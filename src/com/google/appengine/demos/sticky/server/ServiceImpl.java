@@ -29,6 +29,7 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.demos.sticky.client.model.Author;
+import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Service;
 import com.google.appengine.demos.sticky.client.model.Surface;
@@ -86,7 +87,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     int i = 0;
     for (Store.Note n : notes) {
       clients[i++] = new Note(KeyFactory.keyToString(n.getKey()), n.getX(), n
-          .getY(), n.getWidth(), n.getHeight(), n.getContent(), n
+          .getY(), n.getWidth(), n.getHeight(), n.getComments(), n
           .getLastUpdatedAt(), n.getAuthorName(), n.getAuthorEmail());
     }
     return clients;
@@ -177,7 +178,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     }
   }
 
-  public Date changeNoteContent(final String noteKey, final String content)
+  public Date changeNoteContent(final String noteKey, final List<Comment> content)
       throws AccessDeniedException {
     final User user = tryGetCurrentUser(UserServiceFactory.getUserService());
     final Store.Api api = store.getApi();
@@ -193,7 +194,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
       if (!note.isOwnedBy(me)) {
         throw new Service.AccessDeniedException();
       }
-      note.setContent(content);
+      note.setComments(content);
       final Date result = api.saveNote(note).getLastUpdatedAt();
       tx.commit();
 

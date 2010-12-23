@@ -354,18 +354,18 @@ public class Model {
    */
   private class UpdateNoteContentTask extends Task implements
       AsyncCallback<Date> {
-    private final String content;
+    private final List<Comment> comments;
 
     private final Note note;
 
-    public UpdateNoteContentTask(Note note, String content) {
+    public UpdateNoteContentTask(Note note, List<Comment> comments) {
       this.note = note;
-      this.content = content;
+      this.comments = comments;
     }
 
     public void execute() {
-      note.setContent(content);
-      api.changeNoteContent(note.getKey(), content, this);
+      note.setContent(comments);
+      api.changeNoteContent(note.getKey(), comments, this);
     }
 
     public void onFailure(Throwable caught) {
@@ -630,8 +630,8 @@ public class Model {
    * @param note
    * @param content
    */
-  public void updateNoteContent(final Note note, String content) {
-    taskQueue.post(new UpdateNoteContentTask(note, content));
+  public void updateNoteContent(final Note note, List<Comment> comments) {
+    taskQueue.post(new UpdateNoteContentTask(note, comments));
   }
 
   /**

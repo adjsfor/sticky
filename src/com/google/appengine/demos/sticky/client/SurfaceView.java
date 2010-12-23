@@ -15,6 +15,9 @@
 
 package com.google.appengine.demos.sticky.client;
 
+import java.util.List;
+
+import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Surface;
@@ -132,7 +135,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
     }
 
     public void onValueChange(ValueChangeEvent<String> event) {
-      model.updateNoteContent(note, event.getValue());
+     // model.updateNoteContent(note, event.getValue());
     }
 
     public void setPixelPosition(int x, int y) {
@@ -152,10 +155,10 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
 
       titleElement.setInnerHTML(note.getAuthorName());
 
-      final String noteContent = note.getContent();
-      content.setText((noteContent == null) ? "" : noteContent);
-
-      content.setReadOnly(!note.isOwnedByCurrentUser());
+      final List<Comment> noteContent = note.getContent();
+//      content.setText((noteContent == null) ? "" : noteContent);
+//
+//      content.setReadOnly(!note.isOwnedByCurrentUser());
     }
 
     private void select() {

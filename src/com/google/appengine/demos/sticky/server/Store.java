@@ -34,6 +34,7 @@ import javax.jdo.annotations.PrimaryKey;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.users.User;
+import com.google.appengine.demos.sticky.client.model.Comment;
 
 /**
  * An application specific Api wrapper around the {@link DatastoreService}.
@@ -373,7 +374,7 @@ public class Store {
      * The text content of the note.
      */
     @Persistent
-    private String content;
+    private List<Comment> comments;
 
     /**
      * The date of the last time this object was persisted.
@@ -436,8 +437,8 @@ public class Store {
      *
      * @return unsafe text content
      */
-    public String getContent() {
-      return content;
+    public List<Comment> getComments() {
+      return comments;
     }
 
     /**
@@ -511,8 +512,8 @@ public class Store {
      *
      * @param content
      */
-    public void setContent(String content) {
-      this.content = content;
+    public void setComments(List<Comment> comments) {
+      this.comments = comments;
     }
 
     /**
