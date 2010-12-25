@@ -178,7 +178,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     }
   }
 
-  public Date changeNoteContent(final String noteKey, final List<Comment> content)
+  public Date changeNoteContent(final String noteKey, final Comment[] content)
       throws AccessDeniedException {
     final User user = tryGetCurrentUser(UserServiceFactory.getUserService());
     final Store.Api api = store.getApi();

@@ -15,8 +15,6 @@
 
 package com.google.appengine.demos.sticky.client;
 
-import java.util.List;
-
 import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
@@ -43,185 +41,193 @@ import com.google.gwt.user.client.ui.WidgetCollection;
 /**
  * A widget to display the collection of notes that are on a particular
  * {@link Surface}.
- *
+ * 
  */
 public class SurfaceView extends FlowPanel implements Model.DataObserver {
-
-  /**
-   * A widget for displaying a single {@link Note}.
-   */
-  private class NoteView extends SimplePanel implements Note.Observer,
-      MouseUpHandler, MouseDownHandler, MouseMoveHandler,
-      ValueChangeHandler<String> {
-    private final Note note;
-
-    private final DivElement titleElement;
-
-    private final TextArea content = new TextArea();
-
-    // Dragging state.
-    private boolean dragging;
-
-    private int dragOffsetX, dragOffsetY;
-
+    
     /**
-     * @param note
-     *          the note to render
+     * A widget for displaying a single {@link Note}.
      */
-    public NoteView(Note note) {
-      this.note = note;
-      setStyleName("note");
-      note.setObserver(this);
-
-      // Build simple DOM Structure.
-      final Element elem = getElement();
-      elem.getStyle().setProperty("position", "absolute");
-      titleElement = elem.appendChild(Document.get().createDivElement());
-      titleElement.setClassName("note-title");
-
-      content.setStyleName("note-content");
-      content.addValueChangeHandler(this);
-      setWidget(content);
-
-      render();
-
-      addDomHandler(this, MouseDownEvent.getType());
-      addDomHandler(this, MouseMoveEvent.getType());
-      addDomHandler(this, MouseUpEvent.getType());
+    private class NoteView extends SimplePanel implements Note.Observer, MouseUpHandler, MouseDownHandler,
+        MouseMoveHandler, ValueChangeHandler<String> {
+        private final Note note;
+        
+        private final DivElement titleElement;
+        
+        private final TextArea content = new TextArea();
+        
+        // Dragging state.
+        private boolean dragging;
+        
+        private int dragOffsetX, dragOffsetY;
+        
+        private CommentPanel pnlComments;
+        /**
+         * @param note
+         *            the note to render
+         */
+        public NoteView(Note note) {
+            this.note = note;
+            setStyleName("note");
+            note.setObserver(this);
+            
+            // Build simple DOM Structure.
+            final Element elem = getElement();
+            elem.getStyle().setProperty("position", "absolute");
+            titleElement = elem.appendChild(Document.get().createDivElement());
+            titleElement.setClassName("note-title");
+            
+//            content.setStyleName("note-content");
+//            content.addValueChangeHandler(this);
+//            setWidget(content);
+            
+            pnlComments = new CommentPanel(model, note);
+            add(pnlComments);
+            
+            render();
+            
+            addDomHandler(this, MouseDownEvent.getType());
+            addDomHandler(this, MouseMoveEvent.getType());
+            addDomHandler(this, MouseUpEvent.getType());
+        }
+        
+        public void onMouseDown(MouseDownEvent event) {
+            SurfaceView.this.select(this);
+            if (!note.isOwnedByCurrentUser()) {
+                return;
+            }
+            
+            final EventTarget target = event.getNativeEvent().getEventTarget();
+            assert Element.is(target);
+            if (!Element.is(target)) {
+                return;
+            }
+            
+            if (titleElement.isOrHasChild(Element.as(target))) {
+                dragging = true;
+                final Element elem = getElement().cast();
+                dragOffsetX = event.getX();
+                dragOffsetY = event.getY();
+                DOM.setCapture(elem);
+                event.preventDefault();
+            }
+        }
+        
+        public void onMouseMove(MouseMoveEvent event) {
+            if (dragging) {
+                setPixelPosition(event.getX() + getAbsoluteLeft() - dragOffsetX, event.getY() + getAbsoluteTop()
+                    - dragOffsetY);
+                event.preventDefault();
+            }
+        }
+        
+        public void onMouseUp(MouseUpEvent event) {
+            if (dragging) {
+                dragging = false;
+                DOM.releaseCapture(getElement());
+                event.preventDefault();
+                model.updateNotePosition(note, getAbsoluteLeft(), getAbsoluteTop(), note.getWidth(), note.getHeight());
+            }
+        }
+        
+        public void onUpdate(Note note) {
+            render();
+        }
+        
+        public void onValueChange(ValueChangeEvent<String> event) {
+            // model.updateNoteContent(note, event.getValue());
+        }
+        
+        public void setPixelPosition(int x, int y) {
+            final Style style = getElement().getStyle();
+            style.setPropertyPx("left", x);
+            style.setPropertyPx("top", y);
+        }
+        
+        public void setPixelSize(int width, int height) {
+            content.setPixelSize(width, height);
+        }
+        
+        private void render() {
+            setPixelPosition(note.getX(), note.getY());
+            
+            setPixelSize(note.getWidth(), note.getHeight());
+            
+            titleElement.setInnerHTML(note.getAuthorName());
+            
+            final Comment[] noteContent = note.getComments();
+            // content.setText((noteContent == null) ? "" : noteContent);
+            //
+            // content.setReadOnly(!note.isOwnedByCurrentUser());
+        }
+        
+        private void select() {
+            getElement().getStyle().setProperty("zIndex", "" + nextZIndex());
+        }
     }
-
-    public void onMouseDown(MouseDownEvent event) {
-      SurfaceView.this.select(this);
-      if (!note.isOwnedByCurrentUser()) {
-        return;
-      }
-
-      final EventTarget target = event.getNativeEvent().getEventTarget();
-      assert Element.is(target);
-      if (!Element.is(target)) {
-        return;
-      }
-
-      if (titleElement.isOrHasChild(Element.as(target))) {
-        dragging = true;
-        final Element elem = getElement().cast();
-        dragOffsetX = event.getX();
-        dragOffsetY = event.getY();
-        DOM.setCapture(elem);
-        event.preventDefault();
-      }
+    
+    private final Model model;
+    
+    private NoteView selectedNoteView;
+    
+    private int zIndex = 1;
+    
+    /**
+     * @param model
+     *            the model to which the Ui will bind itself
+     */
+    public SurfaceView(Model model) {
+        this.model = model;
+        final Element elem = getElement();
+        elem.setId("surface");
+        elem.getStyle().setProperty("position", "absolute");
+        model.addDataObserver(this);
     }
-
-    public void onMouseMove(MouseMoveEvent event) {
-      if (dragging) {
-        setPixelPosition(event.getX() + getAbsoluteLeft() - dragOffsetX,
-            event.getY() + getAbsoluteTop() - dragOffsetY);
-        event.preventDefault();
-      }
+    
+    public void onNoteCreated(Note note) {
+        final NoteView view = new NoteView(note);
+        add(view);
+        select(view);
     }
-
-    public void onMouseUp(MouseUpEvent event) {
-      if (dragging) {
-        dragging = false;
-        DOM.releaseCapture(getElement());
-        event.preventDefault();
-        model.updateNotePosition(note, getAbsoluteLeft(), getAbsoluteTop(),
-            note.getWidth(), note.getHeight());
-      }
+    
+    public void onSurfaceCreated(Surface group) {
     }
-
-    public void onUpdate(Note note) {
-      render();
+    
+    public void onSurfaceNotesReceived(Note[] notes) {
+        removeAllNotes();
+        for (int i = 0, n = notes.length; i < n; ++i) {
+            add(new NoteView(notes[i]));
+        }
     }
-
-    public void onValueChange(ValueChangeEvent<String> event) {
-     // model.updateNoteContent(note, event.getValue());
+    
+    public void onSurfaceSelected(Surface nowSelected, Surface wasSelected) {
     }
-
-    public void setPixelPosition(int x, int y) {
-      final Style style = getElement().getStyle();
-      style.setPropertyPx("left", x);
-      style.setPropertyPx("top", y);
+    
+    public void onSurfacesReceived(Surface[] surfaces) {
     }
-
-    public void setPixelSize(int width, int height) {
-      content.setPixelSize(width, height);
+    
+    private int nextZIndex() {
+        return zIndex++;
     }
-
-    private void render() {
-      setPixelPosition(note.getX(), note.getY());
-
-      setPixelSize(note.getWidth(), note.getHeight());
-
-      titleElement.setInnerHTML(note.getAuthorName());
-
-      final List<Comment> noteContent = note.getContent();
-//      content.setText((noteContent == null) ? "" : noteContent);
-//
-//      content.setReadOnly(!note.isOwnedByCurrentUser());
+    
+    private void removeAllNotes() {
+        final WidgetCollection kids = getChildren();
+        while (kids.size() > 0) {
+            remove(kids.size() - 1);
+        }
     }
-
-    private void select() {
-      getElement().getStyle().setProperty("zIndex", "" + nextZIndex());
+    
+    private void select(NoteView noteView) {
+        assert noteView != null;
+        if (selectedNoteView != noteView) {
+            noteView.select();
+            selectedNoteView = noteView;
+        }
     }
-  }
-
-  private final Model model;
-
-  private NoteView selectedNoteView;
-
-  private int zIndex = 1;
-
-  /**
-   * @param model
-   *          the model to which the Ui will bind itself
-   */
-  public SurfaceView(Model model) {
-    this.model = model;
-    final Element elem = getElement();
-    elem.setId("surface");
-    elem.getStyle().setProperty("position", "absolute");
-    model.addDataObserver(this);
-  }
-
-  public void onNoteCreated(Note note) {
-    final NoteView view = new NoteView(note);
-    add(view);
-    select(view);
-  }
-
-  public void onSurfaceCreated(Surface group) {
-  }
-
-  public void onSurfaceNotesReceived(Note[] notes) {
-    removeAllNotes();
-    for (int i = 0, n = notes.length; i < n; ++i) {
-      add(new NoteView(notes[i]));
+    
+    @Override
+    public void onCommentAdded(Comment comment) {
+        // TODO Auto-generated method stub
+        
     }
-  }
-
-  public void onSurfaceSelected(Surface nowSelected, Surface wasSelected) {
-  }
-
-  public void onSurfacesReceived(Surface[] surfaces) {
-  }
-
-  private int nextZIndex() {
-    return zIndex++;
-  }
-
-  private void removeAllNotes() {
-    final WidgetCollection kids = getChildren();
-    while (kids.size() > 0) {
-      remove(kids.size() - 1);
-    }
-  }
-
-  private void select(NoteView noteView) {
-    assert noteView != null;
-    if (selectedNoteView != noteView) {
-      noteView.select();
-      selectedNoteView = noteView;
-    }
-  }
 }

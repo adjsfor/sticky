@@ -374,7 +374,7 @@ public class Store {
      * The text content of the note.
      */
     @Persistent
-    private List<Comment> comments;
+    private Comment[] comments;
 
     /**
      * The date of the last time this object was persisted.
@@ -437,7 +437,7 @@ public class Store {
      *
      * @return unsafe text content
      */
-    public List<Comment> getComments() {
+    public Comment[] getComments() {
       return comments;
     }
 
@@ -512,7 +512,7 @@ public class Store {
      *
      * @param content
      */
-    public void setComments(List<Comment> comments) {
+    public void setComments(Comment[] comments) {
       this.comments = comments;
     }
 

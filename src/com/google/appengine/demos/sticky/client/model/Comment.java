@@ -1,7 +1,6 @@
 package com.google.appengine.demos.sticky.client.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @SuppressWarnings("serial")
 public class Comment implements Serializable {
@@ -14,13 +13,17 @@ public class Comment implements Serializable {
     
     private String note;
     
-    private Date createdAt;
+//    @Extension(vendorName = "datanucleus", key = "is-second-class", value="false")
+//    private Date createdAt;
+//    
+    private Comment() {
+        super();
+    }
     
-    public Comment(String note, String author, String text, Date createdAt) {
+    public Comment(String note, String author, String text) {
         this.note = note;
         this.author = author;
         this.text = text;
-        this.createdAt = createdAt;
     }
 
     public String getAuthor() {
@@ -54,13 +57,4 @@ public class Comment implements Serializable {
     public void setNote(String note) {
         this.note = note;
     }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-    
 }

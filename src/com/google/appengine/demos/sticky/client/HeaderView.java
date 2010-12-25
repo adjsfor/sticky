@@ -16,6 +16,7 @@
 package com.google.appengine.demos.sticky.client;
 
 import com.google.appengine.demos.sticky.client.model.Author;
+import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Surface;
@@ -494,4 +495,10 @@ public class HeaderView extends FlowPanel implements Model.DataObserver,
     surfaceNameElement.setInnerText(surface.getTitle());
     authorNamesElement.setInnerText("w/ " + surface.getAuthorNamesAsString());
   }
+
+@Override
+public void onCommentAdded(Comment comment) {
+    // TODO Auto-generated method stub
+    
+}
 }

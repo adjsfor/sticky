@@ -15,6 +15,7 @@
 
 package com.google.appengine.demos.sticky.client;
 
+import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Surface;
@@ -254,4 +255,10 @@ public class SurfaceListView extends FlowPanel implements Model.DataObserver {
   private String getNextStyleNameSuffix() {
     return ((count++ & 1) == 0) ? "-odd" : "-even";
   }
+
+@Override
+public void onCommentAdded(Comment comment) {
+    // TODO Auto-generated method stub
+    
+}
 }
