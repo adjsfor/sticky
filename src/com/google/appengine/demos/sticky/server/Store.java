@@ -373,8 +373,9 @@ public class Store {
     /**
      * The text content of the note.
      */
-    @Persistent
-    private Comment[] comments;
+    @Persistent(mappedBy = "note")
+    @Element(dependent="true")
+    private List<Comment> comments = new ArrayList<Comment>();
 
     /**
      * The date of the last time this object was persisted.
@@ -437,7 +438,7 @@ public class Store {
      *
      * @return unsafe text content
      */
-    public Comment[] getComments() {
+    public List<Comment> getComments() {
       return comments;
     }
 
@@ -512,7 +513,7 @@ public class Store {
      *
      * @param content
      */
-    public void setComments(Comment[] comments) {
+    public void setComments(List<Comment> comments) {
       this.comments = comments;
     }
 

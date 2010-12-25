@@ -16,6 +16,7 @@
 package com.google.appengine.demos.sticky.server;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -87,7 +88,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     int i = 0;
     for (Store.Note n : notes) {
       clients[i++] = new Note(KeyFactory.keyToString(n.getKey()), n.getX(), n
-          .getY(), n.getWidth(), n.getHeight(), n.getComments(), n
+          .getY(), n.getWidth(), n.getHeight(), n.getComments().toArray(new Comment[0]), n
           .getLastUpdatedAt(), n.getAuthorName(), n.getAuthorEmail());
     }
     return clients;
@@ -194,7 +195,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
       if (!note.isOwnedBy(me)) {
         throw new Service.AccessDeniedException();
       }
-      note.setComments(content);
+      note.setComments(Arrays.asList(content));
       final Date result = api.saveNote(note).getLastUpdatedAt();
       tx.commit();
 

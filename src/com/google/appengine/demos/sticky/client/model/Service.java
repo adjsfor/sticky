@@ -17,7 +17,6 @@ package com.google.appengine.demos.sticky.client.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;

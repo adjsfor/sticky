@@ -13,9 +13,7 @@ public class Comment implements Serializable {
     
     private String note;
     
-//    @Extension(vendorName = "datanucleus", key = "is-second-class", value="false")
-//    private Date createdAt;
-//    
+    @SuppressWarnings("unused")
     private Comment() {
         super();
     }
@@ -25,35 +23,35 @@ public class Comment implements Serializable {
         this.author = author;
         this.text = text;
     }
-
+    
     public String getAuthor() {
         return author;
     }
-
+    
     public void setAuthor(String author) {
         this.author = author;
     }
-
+    
     public String getText() {
         return text;
     }
-
+    
     public void setText(String text) {
         this.text = text;
     }
-
+    
     public String getKey() {
         return key;
     }
-
+    
     public void setKey(String key) {
         this.key = key;
     }
-
+    
     public String getNote() {
         return note;
     }
-
+    
     public void setNote(String note) {
         this.note = note;
     }

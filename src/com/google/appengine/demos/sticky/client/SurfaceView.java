@@ -61,7 +61,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
         
         private int dragOffsetX, dragOffsetY;
         
-        private CommentPanel pnlComments;
+        private CommentView pnlComments;
         /**
          * @param note
          *            the note to render
@@ -81,7 +81,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
 //            content.addValueChangeHandler(this);
 //            setWidget(content);
             
-            pnlComments = new CommentPanel(model, note);
+            pnlComments = new CommentView(model, note);
             add(pnlComments);
             
             render();
