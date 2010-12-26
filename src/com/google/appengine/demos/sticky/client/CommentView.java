@@ -2,6 +2,8 @@ package com.google.appengine.demos.sticky.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.appengine.demos.sticky.client.model.Author;
 import com.google.appengine.demos.sticky.client.model.Comment;
@@ -9,13 +11,13 @@ import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Surface;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class CommentView extends VerticalPanel implements KeyPressHandler, Model.DataObserver {
+public class CommentView extends VerticalPanel implements KeyDownHandler, Model.DataObserver {
     
     private Note note;
     
@@ -23,7 +25,7 @@ public class CommentView extends VerticalPanel implements KeyPressHandler, Model
     
     private final FlexTable tblComments = new FlexTable();
     
-    private final TextBox tfComment = new TextBox();
+    private final TextArea taComment = new TextArea();
     
     private List<Comment> comments = new ArrayList<Comment>();
     
@@ -32,14 +34,12 @@ public class CommentView extends VerticalPanel implements KeyPressHandler, Model
         this.note = note;
         
         this.getElement().setClassName("comment");
-        
         this.tblComments.setTitle("Comments");
-        this.tblComments.getElement().setClassName("comment-table");
-        this.tfComment.getElement().setClassName("comment-box");
-        this.tfComment.addKeyPressHandler(this);
+        this.taComment.getElement().setClassName("note-content");
+        this.taComment.addKeyDownHandler(this);
         
         this.add(tblComments);
-        this.add(tfComment);
+        this.add(taComment);
         if (note.getComments() != null) {
             for (Comment c : note.getComments()) {
                 this.comments.add(c);
@@ -50,12 +50,12 @@ public class CommentView extends VerticalPanel implements KeyPressHandler, Model
     }
     
     @Override
-    public void onKeyPress(KeyPressEvent event) {
-        char keyCode = event.getCharCode();
+    public void onKeyDown(KeyDownEvent event) {
+        int keyCode = event.getNativeKeyCode();
         
-        if (keyCode == KeyCodes.KEY_ENTER) {
-            final String text = this.tfComment.getText();
-            this.tfComment.setText("");
+        if (keyCode == KeyCodes.KEY_ENTER && !event.isShiftKeyDown()) {
+            final String text = this.taComment.getText();
+            this.taComment.setText("");
             
             final Comment comment = new Comment(this.note.getKey(), this.model.getCurrentAuthor().getName(), text);
             this.addComment(comment);

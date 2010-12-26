@@ -77,10 +77,6 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             titleElement = elem.appendChild(Document.get().createDivElement());
             titleElement.setClassName("note-title");
             
-//            content.setStyleName("note-content");
-//            content.addValueChangeHandler(this);
-//            setWidget(content);
-            
             pnlComments = new CommentView(model, note);
             add(pnlComments);
             
@@ -150,12 +146,9 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
         
         private void render() {
             setPixelPosition(note.getX(), note.getY());
-            
             setPixelSize(note.getWidth(), note.getHeight());
-            
             titleElement.setInnerHTML(note.getAuthorName());
             
-            //final List<Comment> noteContent = note.getComments();
         }
         
         private void select() {
