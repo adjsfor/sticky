@@ -17,6 +17,7 @@ package com.google.appengine.demos.sticky.client.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -332,7 +333,7 @@ public interface Service extends RemoteService {
    * @return the new last updated date for the note that was modified
    * @throws AccessDeniedException
    */
-  Date changeNoteContent(String noteKey, Comment[] content)
+  Date changeNoteContent(String noteKey, List<Comment> content)
       throws AccessDeniedException;
 
   /**

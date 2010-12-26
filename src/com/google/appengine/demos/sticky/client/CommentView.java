@@ -21,9 +21,9 @@ public class CommentView extends VerticalPanel implements KeyPressHandler, Model
     
     private Model model;
     
-    private final FlexTable commentTable = new FlexTable();
+    private final FlexTable tblComments = new FlexTable();
     
-    private final TextBox commentBox = new TextBox();
+    private final TextBox tfComment = new TextBox();
     
     private List<Comment> comments = new ArrayList<Comment>();
     
@@ -33,13 +33,13 @@ public class CommentView extends VerticalPanel implements KeyPressHandler, Model
         
         this.getElement().setClassName("comment");
         
-        this.commentTable.setTitle("Comments");
-        this.commentTable.getElement().setClassName("comment-table");
-        this.commentBox.getElement().setClassName("comment-box");
-        this.commentBox.addKeyPressHandler(this);
+        this.tblComments.setTitle("Comments");
+        this.tblComments.getElement().setClassName("comment-table");
+        this.tfComment.getElement().setClassName("comment-box");
+        this.tfComment.addKeyPressHandler(this);
         
-        this.add(commentTable);
-        this.add(commentBox);
+        this.add(tblComments);
+        this.add(tfComment);
         if (note.getComments() != null) {
             for (Comment c : note.getComments()) {
                 this.comments.add(c);
@@ -54,13 +54,13 @@ public class CommentView extends VerticalPanel implements KeyPressHandler, Model
         char keyCode = event.getCharCode();
         
         if (keyCode == KeyCodes.KEY_ENTER) {
-            final String text = this.commentBox.getText();
-            this.commentBox.setText("");
+            final String text = this.tfComment.getText();
+            this.tfComment.setText("");
             
             final Comment comment = new Comment(this.note.getKey(), this.model.getCurrentAuthor().getName(), text);
             this.addComment(comment);
             this.comments.add(comment);
-            this.model.updateNoteContent(this.note, this.comments.toArray(new Comment[0]));
+            this.model.updateNoteContent(this.note, this.comments);
         }
     }
     
@@ -71,21 +71,6 @@ public class CommentView extends VerticalPanel implements KeyPressHandler, Model
         }
     }
     
-    private void addComment(Comment comment) {
-        int count = this.commentTable.getRowCount();
-        this.commentTable.setText(count, 0, Author.getShortName(comment.getAuthor()) + ": ");
-        this.commentTable.setText(count, 1, comment.getText());
-    }
-    
-//    public void onUpdate(Note note) {
-//        this.commentTable.removeAllRows();
-//        if (note.getComments() != null) {
-//            for (Comment c : note.getComments()) {
-//                this.addComment(c);
-//            }
-//        }
-//    }
-
     @Override
     public void onNoteCreated(Note note) { }
 
@@ -101,4 +86,9 @@ public class CommentView extends VerticalPanel implements KeyPressHandler, Model
     @Override
     public void onSurfacesReceived(Surface[] surfaces) { }
     
+    private void addComment(Comment comment) {
+        int count = this.tblComments.getRowCount();
+        this.tblComments.setText(count, 0, Author.getShortName(comment.getAuthor()) + ": ");
+        this.tblComments.setText(count, 1, comment.getText());
+    }
 }

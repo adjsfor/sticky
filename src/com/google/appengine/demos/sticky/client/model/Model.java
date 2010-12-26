@@ -354,11 +354,11 @@ public class Model {
      * of a {@link Note}.
      */
     private class UpdateNoteContentTask extends Task implements AsyncCallback<Date> {
-        private final Comment[] comments;
+        private final List<Comment> comments;
         
         private final Note note;
         
-        public UpdateNoteContentTask(Note note, Comment[] comments) {
+        public UpdateNoteContentTask(Note note, List<Comment> comments) {
             this.note = note;
             this.comments = comments;
         }
@@ -623,7 +623,7 @@ public class Model {
      * @param note
      * @param content
      */
-    public void updateNoteContent(final Note note, Comment[] comments) {
+    public void updateNoteContent(final Note note, List<Comment> comments) {
         taskQueue.post(new UpdateNoteContentTask(note, comments));
     }
     

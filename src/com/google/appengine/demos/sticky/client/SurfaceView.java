@@ -155,10 +155,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             
             titleElement.setInnerHTML(note.getAuthorName());
             
-            final Comment[] noteContent = note.getComments();
-            // content.setText((noteContent == null) ? "" : noteContent);
-            //
-            // content.setReadOnly(!note.isOwnedByCurrentUser());
+            //final List<Comment> noteContent = note.getComments();
         }
         
         private void select() {

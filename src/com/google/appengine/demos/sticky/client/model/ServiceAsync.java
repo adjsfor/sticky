@@ -16,6 +16,7 @@
 package com.google.appengine.demos.sticky.client.model;
 
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -41,7 +42,7 @@ public interface ServiceAsync {
    * @param content
    * @param callback
    */
-  void changeNoteContent(String noteKey, Comment[] content,
+  void changeNoteContent(String noteKey, List<Comment> content,
       AsyncCallback<Date> callback);
 
   /**

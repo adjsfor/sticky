@@ -373,7 +373,6 @@ public class Store {
     /**
      * The text content of the note.
      */
-    @Persistent(mappedBy = "note")
     @Element(dependent="true")
     private List<Comment> comments = new ArrayList<Comment>();
 
@@ -552,6 +551,50 @@ public class Store {
     public void setY(int y) {
       this.y = y;
     }
+  }
+  
+  @PersistenceCapable(identityType = IdentityType.APPLICATION)
+  public static class Comment {
+      @PrimaryKey
+      @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+      private Key key;
+      
+      @Persistent
+      private String text;
+      
+      @Persistent
+      private String user;
+      
+      public Comment(String user, String text) {
+          this.user = user;
+          this.text = text;
+      }
+
+    public Key getKey() {
+        return key;
+    }
+
+    public void setKey(Key key) {
+        this.key = key;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+      
+      
   }
 
   /**

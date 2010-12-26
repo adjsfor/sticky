@@ -16,7 +16,6 @@
 package com.google.appengine.demos.sticky.server;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -87,8 +86,14 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     final Note[] clients = new Note[notes.size()];
     int i = 0;
     for (Store.Note n : notes) {
+        
+        final List<Comment> comments = new ArrayList<Comment>();
+        for (Store.Comment c : n.getComments()) {
+            comments.add(new Comment(KeyFactory.keyToString(n.getKey()), c.getUser(), c.getText()));
+        }
+        
       clients[i++] = new Note(KeyFactory.keyToString(n.getKey()), n.getX(), n
-          .getY(), n.getWidth(), n.getHeight(), n.getComments().toArray(new Comment[0]), n
+          .getY(), n.getWidth(), n.getHeight(), comments, n
           .getLastUpdatedAt(), n.getAuthorName(), n.getAuthorEmail());
     }
     return clients;
@@ -179,23 +184,23 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     }
   }
 
-  public Date changeNoteContent(final String noteKey, final Comment[] content)
+  public Date changeNoteContent(final String noteKey, final List<Comment> comments)
       throws AccessDeniedException {
-    final User user = tryGetCurrentUser(UserServiceFactory.getUserService());
     final Store.Api api = store.getApi();
     try {
       // Convert the string version of the key to an actual key.
       final Key key = KeyFactory.stringToKey(noteKey);
-      final Store.Author me = api.getOrCreateNewAuthor(user);
 
       // Start a transaction for the Note we're updating.
       final Transaction tx = api.begin();
       final Store.Note note = api.getNote(key);
-      // Verify that the author owns the Note.
-      if (!note.isOwnedBy(me)) {
-        throw new Service.AccessDeniedException();
+
+      List<Store.Comment> sComments = new ArrayList<Store.Comment>();
+      for (Comment c : comments) {
+          sComments.add(new Store.Comment(c.getAuthor(), c.getText()));
       }
-      note.setComments(Arrays.asList(content));
+      
+      note.setComments(sComments);
       final Date result = api.saveNote(note).getLastUpdatedAt();
       tx.commit();
 

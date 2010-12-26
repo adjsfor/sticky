@@ -17,6 +17,7 @@ package com.google.appengine.demos.sticky.client.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 
@@ -49,7 +50,7 @@ public class Note implements Serializable {
   /**
    * The text content of the note.
    */
-  private Comment[] comments;
+  private List<Comment> comments;
 
   /**
    * The time of the most recent update. This value is always supplied by the
@@ -105,7 +106,7 @@ public class Note implements Serializable {
    * @param authorName
    * @param ownedByCurrentUser
    */
-  public Note(String key, int x, int y, int width, int height, Comment[] comments,
+  public Note(String key, int x, int y, int width, int height, List<Comment> comments,
       Date lastUpdatedAt, String authorName, String authorEmail) {
     assert !GWT.isClient();
     this.key = key;
@@ -131,7 +132,7 @@ public class Note implements Serializable {
     return (ownedByCurrentUser) ? "You" : authorName;
   }
 
-  public Comment[] getComments() {
+  public List<Comment> getComments() {
     return comments;
   }
 
@@ -182,7 +183,7 @@ public class Note implements Serializable {
     return ownedByCurrentUser;
   }
 
-  public void setContent(Comment[] comments) {
+  public void setContent(List<Comment> comments) {
     this.comments = comments;
   }
 
