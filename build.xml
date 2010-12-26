@@ -89,11 +89,13 @@
 
   <target name="compile" depends="compile.backend, compile.frontend"/>
 
-  <target name="runserver" depends="compile">
+  <target name="runserver">
     <java classname="com.google.appengine.tools.development.DevAppServerMain"
         classpath="${appengine.sdk}/lib/appengine-tools-api.jar"
         fork="true" >
       <arg value="war" />
+      <jvmarg value="-Xmx512m" />
+      <jvmarg value="-javaagent:${appengine.sdk}/lib/agent/appengine-agent.jar" />
     </java>
   </target>
 
