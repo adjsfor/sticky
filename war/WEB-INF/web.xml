@@ -9,10 +9,20 @@
     <servlet-name>service</servlet-name>
     <servlet-class>com.google.appengine.demos.sticky.server.ServiceImpl</servlet-class>
   </servlet>
+  
+  <servlet>
+  	<servlet-name>fileUpload</servlet-name>
+  	<servlet-class>com.google.appengine.demos.sticky.server.FileUploadServlet</servlet-class>
+  </servlet>
 
   <servlet-mapping>
     <servlet-name>service</servlet-name>
     <url-pattern>/sticky/service</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+  	<servlet-name>fileUpload</servlet-name>
+  	<url-pattern>/sticky/fileupload</url-pattern>
   </servlet-mapping>
 
   <security-constraint>

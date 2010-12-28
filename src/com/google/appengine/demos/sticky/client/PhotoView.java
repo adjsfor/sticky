@@ -2,6 +2,7 @@ package com.google.appengine.demos.sticky.client;
 
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -16,6 +17,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class PhotoView extends VerticalPanel {
 
+	private static final String UPLOAD_ACTION_URL = GWT.getModuleBaseURL() + "fileupload";
+	
 	private Note note;
     
     private Model model;
@@ -24,51 +27,55 @@ public class PhotoView extends VerticalPanel {
 		this.model = model;
 		this.note = note;
 		
-		final FormPanel form = new FormPanel();
-		form.setAction("/uploadHandler");
+		// Add upload form only to owner notes.
+		if(note.getAuthorName().equals("You")) {
 		
-		form.setEncoding(FormPanel.ENCODING_MULTIPART);
-		form.setMethod(FormPanel.METHOD_POST);
-		
-		form.setWidget(this);
-		
-		final FileUpload fileUpload = new FileUpload();
-		add(fileUpload);
-		
-		Button submitButton = new Button("Submit");
-		submitButton.addClickHandler(new ClickHandler() {
+			final FormPanel form = new FormPanel();
+			form.setAction(UPLOAD_ACTION_URL);
 			
-			@Override
-			public void onClick(ClickEvent event) {
-				form.submit();
-			}
-		});
-		
-		form.addSubmitHandler(new SubmitHandler() {
+			form.setEncoding(FormPanel.ENCODING_MULTIPART);
+			form.setMethod(FormPanel.METHOD_POST);
 			
-			@Override
-			public void onSubmit(SubmitEvent event) {
-					String filename = fileUpload.getFilename();
-					// TODO: Allow only img files
-					if(filename.length() == 0) {
-						Window.alert("No File is selected.");
-						event.cancel();
-					} else
-						Window.alert("Upload successful!");
-			}
-		});
-		
-		form.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+			form.setWidget(this);
 			
-			@Override
-			public void onSubmitComplete(SubmitCompleteEvent event) {
+			final FileUpload fileUpload = new FileUpload();
+			fileUpload.setName("uploadFormElement");
+			add(fileUpload);
+			
+			Button submitButton = new Button("Submit");
+			submitButton.addClickHandler(new ClickHandler() {
 				
+				@Override
+				public void onClick(ClickEvent event) {
+					form.submit();
+				}
+			});
+			
+			form.addSubmitHandler(new SubmitHandler() {
 				
-			}
-		});
-		
-		add(submitButton);
-		
+				@Override
+				public void onSubmit(SubmitEvent event) {
+						String filename = fileUpload.getFilename();
+						// TODO: Allow only img files
+						if(filename.length() == 0) {
+							Window.alert("No File is selected.");
+							event.cancel();
+						} else
+							Window.alert("Upload successful!");
+				}
+			});
+			
+			form.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+				
+				@Override
+				public void onSubmitComplete(SubmitCompleteEvent event) {
+					
+					
+				}
+			});
+			
+			add(submitButton);
+		}
 	}
 	
 }
