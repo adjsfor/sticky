@@ -60,8 +60,7 @@ public class PhotoView extends VerticalPanel {
 						if(filename.length() == 0) {
 							Window.alert("No File is selected.");
 							event.cancel();
-						} else
-							Window.alert("Upload successful!");
+						}
 				}
 			});
 			
@@ -69,8 +68,9 @@ public class PhotoView extends VerticalPanel {
 				
 				@Override
 				public void onSubmitComplete(SubmitCompleteEvent event) {
-					
-					
+					Window.alert("test");
+					Window.alert(event.getResults());					
+					Window.alert("test2");
 				}
 			});
 			
