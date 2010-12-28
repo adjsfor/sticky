@@ -51,6 +51,8 @@ public class Note implements Serializable {
    * The text content of the note.
    */
   private List<Comment> comments;
+  
+  private Photo photo;
 
   /**
    * The time of the most recent update. This value is always supplied by the
@@ -134,6 +136,10 @@ public class Note implements Serializable {
 
   public List<Comment> getComments() {
     return comments;
+  }
+  
+  public Photo getPhoto() {
+	return photo;
   }
 
   public int getHeight() {
@@ -255,6 +261,7 @@ public class Note implements Serializable {
       width = note.width;
       height = note.height;
       comments = note.comments;
+      photo = note.getPhoto();
       ownedByCurrentUser = note.ownedByCurrentUser;
       authorName = note.authorName;
       lastUpdatedAt = note.lastUpdatedAt;

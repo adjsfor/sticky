@@ -36,6 +36,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.WidgetCollection;
 
 /**
@@ -62,6 +63,8 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
         private int dragOffsetX, dragOffsetY;
         
         private CommentView pnlComments;
+        
+        private PhotoView photoView;
         /**
          * @param note
          *            the note to render
@@ -77,8 +80,15 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             titleElement = elem.appendChild(Document.get().createDivElement());
             titleElement.setClassName("note-title");
             
+            VerticalPanel vPanel = new VerticalPanel();
+                   
+            photoView = new PhotoView(model, note);
+            vPanel.add(photoView);
+            
             pnlComments = new CommentView(model, note);
-            add(pnlComments);
+            vPanel.add(pnlComments);
+            
+            add(vPanel);
             
             render();
             

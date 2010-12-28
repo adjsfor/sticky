@@ -31,10 +31,10 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
+import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.users.User;
-import com.google.appengine.demos.sticky.client.model.Comment;
 
 /**
  * An application specific Api wrapper around the {@link DatastoreService}.
@@ -200,6 +200,32 @@ public class Store {
       }
     }
   }
+  
+//  @PersistenceCapable(identityType = IdentityType.APPLICATION)
+//  public static class Photo {
+//	  
+//	  @PrimaryKey
+//	  @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+//	  private Key key;
+//	
+//	  @Persistent
+//	  private Blob data;
+//	  
+//	  public Photo() {}
+//
+//	  public Blob getData() {
+//		  return data;
+//	  }
+//
+//	  public void setData(Blob data) {
+//		  this.data = data;
+//	  }
+//	
+//	  public Key getKey() {
+//		  return key;
+//	  }
+//	  
+//  }
 
   /**
    * An ORM object representing an author.
@@ -375,6 +401,9 @@ public class Store {
      */
     @Element(dependent="true")
     private List<Comment> comments = new ArrayList<Comment>();
+    
+//    @Element(dependent = "true")
+//    private Photo photo;
 
     /**
      * The date of the last time this object was persisted.
@@ -440,8 +469,12 @@ public class Store {
     public List<Comment> getComments() {
       return comments;
     }
+    
+//    public Photo getPhoto() {
+//		return photo;
+//	}
 
-    /**
+	/**
      * Gets the height of the note.
      *
      * @return
@@ -572,10 +605,6 @@ public class Store {
 
     public Key getKey() {
         return key;
-    }
-
-    public void setKey(Key key) {
-        this.key = key;
     }
 
     public String getText() {
