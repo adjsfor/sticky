@@ -17,6 +17,7 @@ package com.google.appengine.demos.sticky.client.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 
@@ -49,7 +50,9 @@ public class Note implements Serializable {
   /**
    * The text content of the note.
    */
-  private String content;
+  private List<Comment> comments;
+  
+  private Photo photo;
 
   /**
    * The time of the most recent update. This value is always supplied by the
@@ -105,7 +108,7 @@ public class Note implements Serializable {
    * @param authorName
    * @param ownedByCurrentUser
    */
-  public Note(String key, int x, int y, int width, int height, String content,
+  public Note(String key, int x, int y, int width, int height, List<Comment> comments,
       Date lastUpdatedAt, String authorName, String authorEmail) {
     assert !GWT.isClient();
     this.key = key;
@@ -113,7 +116,7 @@ public class Note implements Serializable {
     this.y = y;
     this.width = width;
     this.height = height;
-    this.content = content;
+    this.comments = comments;
     this.lastUpdatedAt = lastUpdatedAt;
     this.authorName = authorName;
     this.authorEmail = authorEmail;
@@ -131,8 +134,12 @@ public class Note implements Serializable {
     return (ownedByCurrentUser) ? "You" : authorName;
   }
 
-  public String getContent() {
-    return content;
+  public List<Comment> getComments() {
+    return comments;
+  }
+  
+  public Photo getPhoto() {
+	return photo;
   }
 
   public int getHeight() {
@@ -182,8 +189,8 @@ public class Note implements Serializable {
     return ownedByCurrentUser;
   }
 
-  public void setContent(String content) {
-    this.content = content;
+  public void setContent(List<Comment> comments) {
+    this.comments = comments;
   }
 
   public void setHeight(int height) {
@@ -253,7 +260,8 @@ public class Note implements Serializable {
       y = note.y;
       width = note.width;
       height = note.height;
-      content = note.content;
+      comments = note.comments;
+      photo = note.getPhoto();
       ownedByCurrentUser = note.ownedByCurrentUser;
       authorName = note.authorName;
       lastUpdatedAt = note.lastUpdatedAt;

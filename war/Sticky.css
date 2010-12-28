@@ -126,9 +126,15 @@ body {
   border: none;
   overflow: hidden;
 }
+/*
 .note-content:focus {
   outline: 1px solid #d0c98d;
   overflow: auto;
+}*/
+
+.comment {
+	background-color: #fef49e;
+	width: 100%;
 }
 
 /* surface list */

@@ -31,6 +31,7 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
+import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.users.User;
@@ -199,6 +200,32 @@ public class Store {
       }
     }
   }
+  
+//  @PersistenceCapable(identityType = IdentityType.APPLICATION)
+//  public static class Photo {
+//	  
+//	  @PrimaryKey
+//	  @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+//	  private Key key;
+//	
+//	  @Persistent
+//	  private Blob data;
+//	  
+//	  public Photo() {}
+//
+//	  public Blob getData() {
+//		  return data;
+//	  }
+//
+//	  public void setData(Blob data) {
+//		  this.data = data;
+//	  }
+//	
+//	  public Key getKey() {
+//		  return key;
+//	  }
+//	  
+//  }
 
   /**
    * An ORM object representing an author.
@@ -372,8 +399,11 @@ public class Store {
     /**
      * The text content of the note.
      */
-    @Persistent
-    private String content;
+    @Element(dependent="true")
+    private List<Comment> comments = new ArrayList<Comment>();
+    
+//    @Element(dependent = "true")
+//    private Photo photo;
 
     /**
      * The date of the last time this object was persisted.
@@ -436,11 +466,15 @@ public class Store {
      *
      * @return unsafe text content
      */
-    public String getContent() {
-      return content;
+    public List<Comment> getComments() {
+      return comments;
     }
+    
+//    public Photo getPhoto() {
+//		return photo;
+//	}
 
-    /**
+	/**
      * Gets the height of the note.
      *
      * @return
@@ -511,8 +545,8 @@ public class Store {
      *
      * @param content
      */
-    public void setContent(String content) {
-      this.content = content;
+    public void setComments(List<Comment> comments) {
+      this.comments = comments;
     }
 
     /**
@@ -550,6 +584,46 @@ public class Store {
     public void setY(int y) {
       this.y = y;
     }
+  }
+  
+  @PersistenceCapable(identityType = IdentityType.APPLICATION)
+  public static class Comment {
+      @PrimaryKey
+      @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+      private Key key;
+      
+      @Persistent
+      private String text;
+      
+      @Persistent
+      private String user;
+      
+      public Comment(String user, String text) {
+          this.user = user;
+          this.text = text;
+      }
+
+    public Key getKey() {
+        return key;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+      
+      
   }
 
   /**
