@@ -65,6 +65,8 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
         private CommentView pnlComments;
         
         private PhotoView photoView;
+        
+        private PhotoTransformView photoTransformView;
         /**
          * @param note
          *            the note to render
@@ -81,13 +83,16 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             titleElement.setClassName("note-title");
             
             VerticalPanel vPanel = new VerticalPanel();
-                   
+
+            photoTransformView = new PhotoTransformView(model, note);
+            vPanel.add(photoTransformView);
+            
             photoView = new PhotoView(model, note);
             vPanel.add(photoView);
             
             pnlComments = new CommentView(model, note);
             vPanel.add(pnlComments);
-            
+                        
             add(vPanel);
             
             render();
