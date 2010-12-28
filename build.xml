@@ -2,6 +2,7 @@
   <property environment="env"/>
   <property name="appengine.sdk" value="${env.APPENGINE_SDK}"/>
   <property name="gwt.sdk" value="${env.GWT_SDK}"/>
+  <property name="apache.commons-fileupload" value="${env.APACHE_COMMONS_FILEUPLOAD}"/>
 
   <macrodef name="compile.gwtc">
     <attribute name="module" />
@@ -42,6 +43,9 @@
     </copy>
     <copy todir="war/WEB-INF/lib">
       <fileset file="${gwt.sdk}/gwt-servlet.jar" />
+    </copy>
+    <copy todir="war/WEB-INF/lib">
+          <fileset file="${apache.commons-fileupload}/lib/commons-fileupload-1.2.2.jar" />
     </copy>
   </target>
 
