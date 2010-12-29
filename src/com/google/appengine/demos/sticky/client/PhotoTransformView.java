@@ -2,6 +2,7 @@ package com.google.appengine.demos.sticky.client;
 
 import java.util.List;
 
+import com.google.appengine.demos.sticky.client.Buttons;
 import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
@@ -68,7 +69,7 @@ public class PhotoTransformView extends VerticalPanel implements
 		// setWidget(new Label("Click outside of this popup to close it"));
 
 		// if(note.getAuthorName().equals("You") && note.getPhoto()) {
-		if (note.getAuthorName().equals("You")) {
+		if (note.getAuthorName().equals("You") && note.getPhoto() != null) {
 
 			final Element elem = getElement();
 			elem.setId("image-panel");

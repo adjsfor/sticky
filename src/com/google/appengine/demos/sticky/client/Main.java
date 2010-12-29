@@ -15,6 +15,7 @@
 
 package com.google.appengine.demos.sticky.client;
 
+import com.google.appengine.demos.sticky.client.HeaderView;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.RetryTimer;
 import com.google.gwt.core.client.EntryPoint;
