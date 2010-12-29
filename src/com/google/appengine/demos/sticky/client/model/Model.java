@@ -88,6 +88,7 @@ public class Model {
          * @param comment
          */
         void onCommentAdded(Comment comment);
+        
     }
     
     /**
@@ -418,16 +419,17 @@ public class Model {
 
         private Note note;
         
-        private String key;
+        private int hash;
         
-        public UpdateNotePhotoTask(Note note, String key) {
+        public UpdateNotePhotoTask(Note note, int hash) {
             this.note = note;
-            this.key = key;
+            this.hash = hash;
         }
         
         @Override
         void execute() {
-            note.setPhotoKey(key);
+            note.setHashCode(hash);
+            api.changeNotePhoto(note.getKey(), hash, this);
         }
 
         @Override
@@ -736,7 +738,7 @@ public class Model {
         }
     }
 
-    public void updateNoteImage(Note note, String results) {
+    public void updateNoteImage(Note note, int results) {
         taskQueue.post(new UpdateNotePhotoTask(note, results));
         
     }

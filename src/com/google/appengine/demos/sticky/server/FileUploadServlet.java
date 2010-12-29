@@ -17,11 +17,12 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 
 import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.KeyFactory;
 
 public class FileUploadServlet extends HttpServlet {
     
     private static final long serialVersionUID = 1L;
-
+    
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (ServletFileUpload.isMultipartContent(request)) {
@@ -33,41 +34,24 @@ public class FileUploadServlet extends HttpServlet {
             
             try {
                 FileItemIterator iterator = upload.getItemIterator(request);
-                System.out.println("test");
-                    System.out.println("test2");
-                    FileItemStream stream = iterator.next();
-                    InputStream is = stream.openStream();
-                    
-                    ByteArrayOutputStream os = new ByteArrayOutputStream();
-                    int len;
-                    byte[] buffer = new byte[8192];
-                    
-                    while ((len = is.read(buffer, 0, buffer.length)) != -1) {
-                        os.write(buffer, 0, len);
-                    }
-                    
-//                    int maxFileSize = 10 * 1024 * 2;
-//                    if (os.size() > maxFileSize) {
-//                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-//                            "File exceeds maximum file length.");
-//                        return;
-//                    }
-                    
-                    Blob blob = new Blob(IOUtils.toByteArray(is));
-                    Store.Photo photo = new Store.Photo();
-                    photo.setImage(blob);
-                    photo.setName("Name"); //We have to generate a name or take the file name or something..
-                    
-                    PersistenceManager pm = PMF.get().getPersistenceManager();
-                    pm.makePersistent(photo);
-                    pm.close();
-                    
-                    System.out.println(stream.getFieldName());
+                FileItemStream stream = iterator.next();
+                InputStream is = stream.openStream();
+                
+                Blob blob = new Blob(IOUtils.toByteArray(is));
+                Store.Photo photo = new Store.Photo();
+                photo.setImage(blob);
+                PersistenceManager pm = PMF.get().getPersistenceManager();
+                pm.makePersistent(photo);
+                photo.setHashCode(photo.getKey().hashCode());
+                
+                pm.close();
+                
                 response.setStatus(HttpServletResponse.SC_CREATED);
                 response.setContentType("text/html");
-                response.getWriter().write(photo.getKey().toString());
+                System.out.println("HASH: " + photo.getHashCode());
+                response.getWriter().write(""+photo.getHashCode());
                 response.flushBuffer();
-              
+                
             } catch (FileUploadException e) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "An error occured while uploading the file: " + e.getMessage());

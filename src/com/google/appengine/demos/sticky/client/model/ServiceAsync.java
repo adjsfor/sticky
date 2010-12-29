@@ -56,6 +56,8 @@ public interface ServiceAsync {
    */
   void changeNotePosition(String noteKey, int x, int y, int width, int height,
       AsyncCallback<Date> callback);
+  
+  void changeNotePhoto(String noteKey, int hash, AsyncCallback<Date> callback);
 
   /**
    * @see Service#createNote(user, int, int, int, int)

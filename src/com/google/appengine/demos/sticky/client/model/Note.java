@@ -52,10 +52,6 @@ public class Note implements Serializable {
      */
     private List<Comment> comments;
     
-    private Photo photo;
-    
-    private String photoKey;
-    
     /**
      * The time of the most recent update. This value is always supplied by the
      * server.
@@ -68,6 +64,8 @@ public class Note implements Serializable {
     private String authorName;
     
     private String authorEmail;
+    
+    private Integer hashCode;
     
     /**
      * An observer to receive callbacks whenever this {@link Note} is updated.
@@ -111,7 +109,7 @@ public class Note implements Serializable {
      * @param ownedByCurrentUser
      */
     public Note(String key, int x, int y, int width, int height, List<Comment> comments, Date lastUpdatedAt,
-        String authorName, String authorEmail) {
+        String authorName, String authorEmail, int hash) {
         assert !GWT.isClient();
         this.key = key;
         this.x = x;
@@ -122,6 +120,7 @@ public class Note implements Serializable {
         this.lastUpdatedAt = lastUpdatedAt;
         this.authorName = authorName;
         this.authorEmail = authorEmail;
+        this.hashCode = hash;
     }
     
     /**
@@ -140,9 +139,9 @@ public class Note implements Serializable {
         return comments;
     }
     
-    public Photo getPhoto() {
-        return photo;
-    }
+//    public Photo getPhoto() {
+//        return photo;
+//    }
     
     public int getHeight() {
         return height;
@@ -264,7 +263,7 @@ public class Note implements Serializable {
             width = note.width;
             height = note.height;
             comments = note.comments;
-            photo = note.getPhoto();
+            hashCode = note.getHashCode();
             ownedByCurrentUser = note.ownedByCurrentUser;
             authorName = note.authorName;
             lastUpdatedAt = note.lastUpdatedAt;
@@ -280,11 +279,11 @@ public class Note implements Serializable {
         return this;
     }
     
-    public void setPhotoKey(String photo) {
-        this.photoKey = photo;
+    public void setHashCode(int hash) {
+        this.hashCode = hash;
     }
     
-    public String getPhotoKey() {
-        return this.photoKey;
+    public Integer getHashCode() {
+        return hashCode;
     }
 }

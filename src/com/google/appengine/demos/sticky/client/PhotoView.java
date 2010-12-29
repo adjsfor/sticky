@@ -3,15 +3,19 @@ package com.google.appengine.demos.sticky.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
+import com.google.appengine.demos.sticky.client.model.Surface;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
@@ -19,9 +23,11 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
-public class PhotoView extends VerticalPanel {
+public class PhotoView extends VerticalPanel implements Model.DataObserver {
     
     private static final String UPLOAD_ACTION_URL = GWT.getModuleBaseURL() + "fileupload";
+    
+    private static final String PHOTO_ACTION_URL = GWT.getModuleBaseURL() + "photos";
     
     private static final Logger LOG = Logger.getLogger(PhotoView.class.toString());
     
@@ -32,6 +38,10 @@ public class PhotoView extends VerticalPanel {
     private FormPanel form = new FormPanel();
     
     private FileUpload fu =  new FileUpload();
+    
+    private Image image = new Image();
+
+    private VerticalPanel holder;
     
     public PhotoView(Model model, Note note) {
         this.model = model;
@@ -47,7 +57,7 @@ public class PhotoView extends VerticalPanel {
             this.form.setEncoding(FormPanel.ENCODING_MULTIPART);
             this.form.setMethod(FormPanel.METHOD_POST);
             
-            VerticalPanel holder = new VerticalPanel();
+            holder = new VerticalPanel();
             
             fu.setName("uploadFormElement");
             
@@ -82,11 +92,16 @@ public class PhotoView extends VerticalPanel {
                 
                 @Override
                 public void onSubmitComplete(SubmitCompleteEvent event) {
-                    LOG.log(Level.SEVERE, "test");
-                    LOG.log(Level.SEVERE, event.getResults());
-                    LOG.log(Level.SEVERE, "test2");
-                    Window.alert(event.getResults());
-                    model.updateNoteImage(note, event.getResults());
+                    LOG.log(Level.SEVERE, "KEY: " + event.getResults());
+                    
+                    try {
+                        int hash = Integer.parseInt(event.getResults());
+                        model.updateNoteImage(note, hash);
+                    } catch (NumberFormatException e) {
+                        //do nothing
+                    }
+                    
+                    renderPhoto();
                 }
             });
             
@@ -94,5 +109,53 @@ public class PhotoView extends VerticalPanel {
         
         return form;
     }
-    
+
+    @Override
+    public void onCommentAdded(Comment comment) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onNoteCreated(Note note) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onSurfaceCreated(Surface surface) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onSurfaceNotesReceived(Note[] notes) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onSurfaceSelected(Surface nowSelected, Surface wasSelected) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onSurfacesReceived(Surface[] surfaces) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void renderPhoto() {
+        if (this.note.getHashCode() != null) {
+            LOG.log(Level.INFO, "rendering");
+            holder.clear();
+            image = new Image(PHOTO_ACTION_URL+"?hash=" + this.note.getHashCode());
+            image.setSize("15em", "15em");
+            holder.add(image);
+        } else {
+            LOG.log(Level.INFO, "null, not rendering");
+        }
+    }
+
 }

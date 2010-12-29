@@ -355,6 +355,7 @@ public interface Service extends RemoteService {
   Date changeNotePosition(String noteKey, int x, int y, int width, int height)
       throws AccessDeniedException;
 
+  Date changeNotePhoto(String noteKey, int hash) throws AccessDeniedException;
   /**
    * Creates a new {@link Note}.
    *
@@ -423,4 +424,5 @@ public interface Service extends RemoteService {
    * @throws AccessDeniedException
    */
   UserInfoResult getUserInfo() throws AccessDeniedException;
+
 }

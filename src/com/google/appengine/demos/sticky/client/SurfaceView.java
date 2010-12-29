@@ -158,6 +158,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             setPixelPosition(note.getX(), note.getY());
             setPixelSize(note.getWidth(), note.getHeight());
             titleElement.setInnerHTML(note.getAuthorName());
+            photoView.renderPhoto();
             
         }
         
@@ -227,7 +228,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
     
     @Override
     public void onCommentAdded(Comment comment) {
-        // TODO Auto-generated method stub
+        
         
     }
 }
