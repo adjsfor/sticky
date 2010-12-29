@@ -413,6 +413,38 @@ public class Model {
         }
     }
     
+    private class UpdateNotePhotoTask extends Task implements AsyncCallback<Date> {
+
+
+        private Note note;
+        
+        private String key;
+        
+        public UpdateNotePhotoTask(Note note, String key) {
+            this.note = note;
+            this.key = key;
+        }
+        
+        @Override
+        void execute() {
+            note.setPhotoKey(key);
+        }
+
+        @Override
+        public void onFailure(Throwable caught) {
+            getQueue().taskFailed(this, caught instanceof Service.AccessDeniedException);
+            
+        }
+
+        @Override
+        public void onSuccess(Date result) {
+            note.update(result);
+            getQueue().taskSucceeded(this);
+            
+        }
+        
+    }
+    
     /**
      * The period to use, in millisconds, for polling for updates to notes on
      * the currently selected surface.
@@ -702,5 +734,10 @@ public class Model {
             statusObserver.onServerCameBack();
             offline = false;
         }
+    }
+
+    public void updateNoteImage(Note note, String results) {
+        taskQueue.post(new UpdateNotePhotoTask(note, results));
+        
     }
 }

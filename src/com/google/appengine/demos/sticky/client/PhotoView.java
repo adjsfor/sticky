@@ -43,7 +43,7 @@ public class PhotoView extends VerticalPanel {
     public Widget getFileUploaderWidget() {
         // Add upload form only to owner notes.
         if (note.getAuthorName().equals("You")) {
-            this.form.setAction(GWT.getModuleBaseURL() + "fileupload");
+            this.form.setAction(UPLOAD_ACTION_URL);
             this.form.setEncoding(FormPanel.ENCODING_MULTIPART);
             this.form.setMethod(FormPanel.METHOD_POST);
             
@@ -86,6 +86,7 @@ public class PhotoView extends VerticalPanel {
                     LOG.log(Level.SEVERE, event.getResults());
                     LOG.log(Level.SEVERE, "test2");
                     Window.alert(event.getResults());
+                    model.updateNoteImage(note, event.getResults());
                 }
             });
             

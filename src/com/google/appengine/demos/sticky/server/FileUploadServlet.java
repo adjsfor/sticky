@@ -57,7 +57,7 @@ public class FileUploadServlet extends HttpServlet {
                     Store.Photo photo = new Store.Photo();
                     photo.setImage(blob);
                     photo.setName("Name"); //We have to generate a name or take the file name or something..
-
+                    
                     PersistenceManager pm = PMF.get().getPersistenceManager();
                     pm.makePersistent(photo);
                     pm.close();
@@ -65,7 +65,7 @@ public class FileUploadServlet extends HttpServlet {
                     System.out.println(stream.getFieldName());
                 response.setStatus(HttpServletResponse.SC_CREATED);
                 response.setContentType("text/html");
-                response.getWriter().write("File uploaded successfully.");
+                response.getWriter().write(photo.getKey().toString());
                 response.flushBuffer();
               
             } catch (FileUploadException e) {
