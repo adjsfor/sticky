@@ -31,8 +31,10 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.demos.sticky.client.model.Author;
 import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Note;
+import com.google.appengine.demos.sticky.client.model.Photo;
 import com.google.appengine.demos.sticky.client.model.Service;
 import com.google.appengine.demos.sticky.client.model.Surface;
+import com.google.appengine.demos.sticky.client.model.Transformation;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -184,7 +186,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     }
   }
 
-  public Date changeNoteContent(final String noteKey, final List<Comment> comments)
+  public Date changeNoteContent(final String noteKey, final List<Comment> comments, final Transformation transformation)
       throws AccessDeniedException {
     final Store.Api api = store.getApi();
     try {
@@ -199,6 +201,8 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
       for (Comment c : comments) {
           sComments.add(new Store.Comment(c.getAuthor(), c.getText()));
       }
+      
+      note.getPhoto().transform(transformation);
       
       note.setComments(sComments);
       final Date result = api.saveNote(note).getLastUpdatedAt();

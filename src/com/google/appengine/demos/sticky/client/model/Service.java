@@ -333,7 +333,7 @@ public interface Service extends RemoteService {
    * @return the new last updated date for the note that was modified
    * @throws AccessDeniedException
    */
-  Date changeNoteContent(String noteKey, List<Comment> content)
+  Date changeNoteContent(String noteKey, List<Comment> content, Transformation transformation)
       throws AccessDeniedException;
 
   /**

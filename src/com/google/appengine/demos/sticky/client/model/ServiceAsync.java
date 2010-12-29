@@ -42,7 +42,7 @@ public interface ServiceAsync {
    * @param content
    * @param callback
    */
-  void changeNoteContent(String noteKey, List<Comment> content,
+  void changeNoteContent(String noteKey, List<Comment> content, Transformation transformation,
       AsyncCallback<Date> callback);
 
   /**

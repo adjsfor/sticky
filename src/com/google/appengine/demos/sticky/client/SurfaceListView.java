@@ -18,7 +18,9 @@ package com.google.appengine.demos.sticky.client;
 import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
+import com.google.appengine.demos.sticky.client.model.Photo;
 import com.google.appengine.demos.sticky.client.model.Surface;
+import com.google.appengine.demos.sticky.client.model.Transformation;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -260,5 +262,11 @@ public class SurfaceListView extends FlowPanel implements Model.DataObserver {
 public void onCommentAdded(Comment comment) {
     // TODO Auto-generated method stub
     
+}
+
+@Override
+public void onPhotoTransform(Photo photo, Transformation transformation) {
+	// TODO Auto-generated method stub
+	
 }
 }
