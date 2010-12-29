@@ -95,7 +95,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
             for (Store.Comment c : n.getComments()) {
                 comments.add(new Comment(KeyFactory.keyToString(n.getKey()), c.getUser(), c.getText()));
             }
-            
+            System.out.println("IN toClientNotes: " + n.getHashCode());
             clients[i++] = new Note(KeyFactory.keyToString(n.getKey()), n.getX(), n.getY(), n.getWidth(),
                 n.getHeight(), comments, n.getLastUpdatedAt(), n.getAuthorName(), n.getAuthorEmail(), n.getHashCode());
         }

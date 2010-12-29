@@ -10,7 +10,6 @@ import com.google.appengine.demos.sticky.client.model.Surface;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -43,11 +42,12 @@ public class PhotoView extends VerticalPanel implements Model.DataObserver {
 
     private VerticalPanel holder;
     
-    public PhotoView(Model model, Note note) {
+    private Callback callback;
+    
+    public PhotoView(Model model, Note note, Callback callback) {
         this.model = model;
         this.note = note;
-        
-      
+        this.callback = callback;
     }
     
     public Widget getFileUploaderWidget() {
@@ -97,11 +97,10 @@ public class PhotoView extends VerticalPanel implements Model.DataObserver {
                     try {
                         int hash = Integer.parseInt(event.getResults());
                         model.updateNoteImage(note, hash);
+                        callback.callback();
                     } catch (NumberFormatException e) {
                         //do nothing
                     }
-                    
-                    renderPhoto();
                 }
             });
             
@@ -146,16 +145,23 @@ public class PhotoView extends VerticalPanel implements Model.DataObserver {
         
     }
 
-    public void renderPhoto() {
-        if (this.note.getHashCode() != null) {
+    public Image getPhoto() {
+        LOG.log(Level.INFO, "" + note.getHashCode());
+        if (this.note.getHashCode() != null && this.note.getHashCode() != 0) {
             LOG.log(Level.INFO, "rendering");
-            holder.clear();
-            image = new Image(PHOTO_ACTION_URL+"?hash=" + this.note.getHashCode());
+            if (holder != null) {
+                holder.clear();
+            }
+            
+            image = new Image(PHOTO_ACTION_URL + "?hash=" + this.note.getHashCode());
             image.setSize("15em", "15em");
-            holder.add(image);
+            
+            return image;
         } else {
             LOG.log(Level.INFO, "null, not rendering");
+            return null;
         }
+        
     }
 
 }

@@ -695,6 +695,13 @@ public class Model {
         }
     }
     
+    void notifyCommentAdded(Comment comment) {
+        for (int i = 0, n = dataObservers.size(); i < n; ++i) {
+            dataObservers.get(i).onCommentAdded(comment);
+        }
+    
+    }
+    
     void notifySurfaceCreated(Surface surface) {
         for (int i = 0, n = dataObservers.size(); i < n; ++i) {
             dataObservers.get(i).onSurfaceCreated(surface);
