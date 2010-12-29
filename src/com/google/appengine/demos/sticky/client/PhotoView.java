@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class PhotoView extends VerticalPanel {
@@ -37,6 +38,10 @@ public class PhotoView extends VerticalPanel {
 			form.setMethod(FormPanel.METHOD_POST);
 			
 			form.setWidget(this);
+			
+//			final TextBox tb = new TextBox();
+//		    tb.setName("textBoxFormElement");
+//		    add(tb);
 			
 			final FileUpload fileUpload = new FileUpload();
 			fileUpload.setName("uploadFormElement");
