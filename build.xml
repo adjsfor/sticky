@@ -3,6 +3,7 @@
   <property name="appengine.sdk" value="${env.APPENGINE_SDK}"/>
   <property name="gwt.sdk" value="${env.GWT_SDK}"/>
   <property name="apache.commons-fileupload" value="${env.APACHE_COMMONS_FILEUPLOAD}"/>
+  <property name="apache.commons-io" value="${env.APACHE_COMMONS_IO}"/>	
 
   <macrodef name="compile.gwtc">
     <attribute name="module" />
@@ -47,6 +48,9 @@
     <copy todir="war/WEB-INF/lib">
           <fileset file="${apache.commons-fileupload}/lib/commons-fileupload-1.2.2.jar" />
     </copy>
+  	<copy todir="war/WEB-INF/lib">
+  	          <fileset file="${apache.commons-io}/commons-io-1.4.jar" />
+  	</copy>
   </target>
 
   <target name="compile.init">

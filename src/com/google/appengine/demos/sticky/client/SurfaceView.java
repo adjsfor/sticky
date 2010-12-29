@@ -83,7 +83,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             VerticalPanel vPanel = new VerticalPanel();
                    
             photoView = new PhotoView(model, note);
-            vPanel.add(photoView);
+            vPanel.add(photoView.getFileUploaderWidget());
             
             pnlComments = new CommentView(model, note);
             vPanel.add(pnlComments);

@@ -201,32 +201,6 @@ public class Store {
     }
   }
   
-//  @PersistenceCapable(identityType = IdentityType.APPLICATION)
-//  public static class Photo {
-//	  
-//	  @PrimaryKey
-//	  @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
-//	  private Key key;
-//	
-//	  @Persistent
-//	  private Blob data;
-//	  
-//	  public Photo() {}
-//
-//	  public Blob getData() {
-//		  return data;
-//	  }
-//
-//	  public void setData(Blob data) {
-//		  this.data = data;
-//	  }
-//	
-//	  public Key getKey() {
-//		  return key;
-//	  }
-//	  
-//  }
-
   /**
    * An ORM object representing an author.
    */
@@ -625,6 +599,44 @@ public class Store {
       
       
   }
+  
+  @PersistenceCapable(identityType = IdentityType.APPLICATION)
+  public static class Photo {
+  
+      @PrimaryKey
+      @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+      private Key key;
+      
+      @Persistent
+      private String name;
+      
+      @Persistent
+      private Blob image;
+
+    public void setKey(Key key) {
+        this.key = key;
+    }
+
+    public Key getKey() {
+        return key;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setImage(Blob image) {
+        this.image = image;
+    }
+
+    public Blob getImage() {
+        return image;
+    }
+  }
 
   /**
    * A JDO object representing a surface.
@@ -756,7 +768,7 @@ public class Store {
    * @param config
    */
   public Store(String config) {
-    this.factory = JDOHelper.getPersistenceManagerFactory(config);
+    this.factory = PMF.get();
   }
 
   /**
