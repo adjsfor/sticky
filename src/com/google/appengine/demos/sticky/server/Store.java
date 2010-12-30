@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -35,13 +34,7 @@ import javax.jdo.annotations.PrimaryKey;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.images.Image;
-import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.images.ImagesServiceFactory;
-import com.google.appengine.api.images.Transform;
 import com.google.appengine.api.users.User;
-import com.google.appengine.demos.sticky.client.model.Transformation;
 
 /**
  * An application specific Api wrapper around the {@link DatastoreService}.
@@ -216,7 +209,6 @@ public class Store {
             return this.manager.getObjectById(Photo.class, key);
         }
         
-      //TODO Make this work.
         public Photo getPhoto(int hash){
                 Query query = this.manager.newQuery(Store.Photo.class);
                 query.setFilter("hashCode == paramName");

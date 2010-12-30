@@ -1,10 +1,8 @@
 package com.google.appengine.demos.sticky.client;
 
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Transformation;

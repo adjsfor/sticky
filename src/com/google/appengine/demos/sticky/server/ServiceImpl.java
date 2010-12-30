@@ -20,8 +20,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
 import javax.jdo.Transaction;
 
 import com.google.appengine.api.datastore.Blob;
@@ -41,7 +39,6 @@ import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Service;
 import com.google.appengine.demos.sticky.client.model.Surface;
 import com.google.appengine.demos.sticky.client.model.Transformation;
-import com.google.appengine.demos.sticky.server.Store.Photo;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -273,7 +270,6 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
                 Image newImage;
                 Transform transform;
                 byte[] newImageData = null;
-                //PersistenceManager pm = PMF.get().getPersistenceManager();
                 switch (transformation) {
                 case CROP:
                         //TODO Crop
@@ -299,32 +295,24 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
                         newImage = imagesService.applyTransform(transform, oldImage);
                         newImageData = newImage.getImageData();
                         photo.setImage(new Blob(newImageData));
-//                        pm.makePersistent(photo);
-//                        pm.close();
                         break;
                 case FLIP_V:
                         transform = ImagesServiceFactory.makeVerticalFlip();
                         newImage = imagesService.applyTransform(transform, oldImage);
                         newImageData = newImage.getImageData();
                         photo.setImage(new Blob(newImageData));
-//                        pm.makePersistent(photo);
-//                        pm.close();
                         break;
                 case ROT_C:
                         transform = ImagesServiceFactory.makeRotate(90);
                         newImage = imagesService.applyTransform(transform, oldImage);
                         newImageData = newImage.getImageData();
                         photo.setImage(new Blob(newImageData));
-//                        pm.makePersistent(photo);
-//                        pm.close();
                         break;
                 case ROT_CC:
                         transform = ImagesServiceFactory.makeRotate(-90);
                         newImage = imagesService.applyTransform(transform, oldImage);
                         newImageData = newImage.getImageData();
                         photo.setImage(new Blob(newImageData));
-//                        pm.makePersistent(photo);
-//                        pm.close();
                         break;
                 case NONE:
                         break;

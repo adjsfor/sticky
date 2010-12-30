@@ -1,6 +1,5 @@
 package com.google.appengine.demos.sticky.server;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -17,7 +16,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 
 import com.google.appengine.api.datastore.Blob;
-import com.google.appengine.api.datastore.KeyFactory;
 
 public class FileUploadServlet extends HttpServlet {
     
