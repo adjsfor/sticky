@@ -421,15 +421,18 @@ public class Model {
         
         private int hash;
         
-        public UpdateNotePhotoTask(Note note, int hash) {
+        private Transformation transformation;
+        
+        public UpdateNotePhotoTask(Note note, int hash, Transformation transformation) {
             this.note = note;
             this.hash = hash;
+            this.transformation = transformation;
         }
         
         @Override
         void execute() {
             note.setHashCode(hash);
-            api.changeNotePhoto(note.getKey(), hash, this);
+            api.changeNotePhoto(note.getKey(), hash, transformation, this);
         }
 
         @Override
@@ -745,8 +748,8 @@ public class Model {
         }
     }
 
-    public void updateNoteImage(Note note, int results) {
-        taskQueue.post(new UpdateNotePhotoTask(note, results));
+    public void updateNoteImage(Note note, int results, Transformation transformation) {
+        taskQueue.post(new UpdateNotePhotoTask(note, results, transformation));
         
     }
     

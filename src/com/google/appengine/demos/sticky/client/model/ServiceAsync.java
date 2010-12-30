@@ -37,12 +37,13 @@ public interface ServiceAsync {
       AsyncCallback<Service.AddAuthorToSurfaceResult> callback);
 
   /**
-   * @see Service#changeNoteContent(String, String)
+   * @see Service#changeNoteContent(String, List<Comment>, Transformation)
    * @param noteKey
    * @param content
+   * @param transformation
    * @param callback
    */
-  void changeNoteContent(String noteKey, List<Comment> content,
+  void changeNoteContent(String noteKey, List<Comment> content, 
       AsyncCallback<Date> callback);
 
   /**
@@ -57,7 +58,7 @@ public interface ServiceAsync {
   void changeNotePosition(String noteKey, int x, int y, int width, int height,
       AsyncCallback<Date> callback);
   
-  void changeNotePhoto(String noteKey, int hash, AsyncCallback<Date> callback);
+  void changeNotePhoto(String noteKey, int hash, Transformation transformation, AsyncCallback<Date> callback);
 
   /**
    * @see Service#createNote(user, int, int, int, int)

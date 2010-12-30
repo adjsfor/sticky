@@ -67,6 +67,8 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
         
         private PhotoView photoView;
         
+        private PhotoTransformView photoTransformView;
+        
         private VerticalPanel panel;
         
         /**
@@ -85,7 +87,9 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             titleElement.setClassName("note-title");
             
             panel = new VerticalPanel();
-            
+
+            //photoTransformView = new PhotoTransformView(model, note);
+            //panel.add(photoTransformView);
             photoView = new PhotoView(model, note, new Callback() {
                 public void callback() {
                     render();
@@ -93,11 +97,10 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             });
             
             pnlComments = new CommentView(model, note);
-            
             add(panel);
-            
             render();
-            
+            photoTransformView = new PhotoTransformView(model, note);
+            panel.add(photoTransformView);
             addDomHandler(this, MouseDownEvent.getType());
             addDomHandler(this, MouseMoveEvent.getType());
             addDomHandler(this, MouseUpEvent.getType());

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+
+  <welcome-file-list>
+    <welcome-file>Sticky.html</welcome-file>
+  </welcome-file-list>
+  
+  <servlet>
+  	<servlet-name>fileUpload</servlet-name>
+  	<servlet-class>com.google.appengine.demos.sticky.server.FileUploadServlet</servlet-class>
+  </servlet>
+
+<servlet>
+    <servlet-name>photoRetriever</servlet-name>
+    <servlet-class>com.google.appengine.demos.sticky.server.PhotoRetrieverServlet</servlet-class>
+  </servlet>
+
+<<<<<<< HEAD
+  <servlet-mapping>
+    <servlet-name>photoRetriever</servlet-name>
+    <url-pattern>/sticky/photos</url-pattern>
+  </servlet-mapping>
+
+=======
+>>>>>>> 3649f1a03c0db817ed68f8cd13ceb8558014a587
+  <servlet-mapping>
+    <servlet-name>photoRetriever</servlet-name>
+    <url-pattern>/sticky/photos</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+  	<servlet-name>fileUpload</servlet-name>
+  	<url-pattern>/sticky/fileupload</url-pattern>
+  </servlet-mapping>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>all</web-resource-name>
+      <url-pattern>/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+</web-app>
