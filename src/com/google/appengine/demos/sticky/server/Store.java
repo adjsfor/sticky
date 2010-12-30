@@ -584,7 +584,7 @@ public class Store {
         	Query query = pm.newQuery(Store.Photo.class);
         	query.setFilter("hashCode == paramName");
         	query.declareParameters("int paramName");
-        	Store.Photo photo = ((List<Store.Photo>) query.execute(this.getKey().hashCode())).get(0);
+        	Store.Photo photo = ((List<Store.Photo>) query.execute(this.getHashCode())).get(0);
         	return photo;
         }
     }
