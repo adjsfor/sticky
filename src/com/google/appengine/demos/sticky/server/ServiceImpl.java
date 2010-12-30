@@ -237,8 +237,8 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
             note.setHashCode(hash);
             
             //TODO Transformation
-            if(transformation.compareTo(Transformation.NONE) != 0 ){
-            	api.getPhoto(key).transform(transformation);
+            if(transformation.compareTo(Transformation.NONE) != 0 && note.getHashCode() != 0){
+            	note.getPhoto().transform(transformation);
             }
             
             final Date result = api.saveNote(note).getLastUpdatedAt();

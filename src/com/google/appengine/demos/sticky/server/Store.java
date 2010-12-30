@@ -23,6 +23,7 @@ import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Query;
 import javax.jdo.Transaction;
 import javax.jdo.annotations.Element;
 import javax.jdo.annotations.IdGeneratorStrategy;
@@ -573,6 +574,19 @@ public class Store {
         public void setY(int y) {
             this.y = y;
         }
+        
+        /**
+         * Get the associated photo
+         */
+        //TODO Make this work.
+        public Photo getPhoto(){
+        	PersistenceManager pm = PMF.get().getPersistenceManager();
+        	Query query = pm.newQuery(Store.Photo.class);
+        	query.setFilter("hashCode == paramName");
+        	query.declareParameters("int paramName");
+        	Store.Photo photo = ((List<Store.Photo>) query.execute(this.getKey().hashCode())).get(0);
+        	return photo;
+        }
     }
     
     @PersistenceCapable(identityType = IdentityType.APPLICATION)
@@ -663,18 +677,19 @@ public class Store {
 			PersistenceManager pm = PMF.get().getPersistenceManager();
 			switch (transformation) {
 			case CROP:
-				double leftX = 0.;
-				double topY = 0.;
-				double rightX = 0.;
-				double bottomY = 0.;
-				transform = ImagesServiceFactory.makeCrop(leftX, topY, rightX,
-						bottomY);
-				newImage = imagesService.applyTransform(transform, oldImage);
-				newImageData = newImage.getImageData();
-				this.setImage(new Blob(newImageData));
-				pm = PMF.get().getPersistenceManager();
-                pm.makePersistent(this);
-                pm.close();
+				//TODO Crop
+//				double leftX = 0.;
+//				double topY = 0.;
+//				double rightX = 0.;
+//				double bottomY = 0.;
+//				transform = ImagesServiceFactory.makeCrop(leftX, topY, rightX,
+//						bottomY);
+//				newImage = imagesService.applyTransform(transform, oldImage);
+//				newImageData = newImage.getImageData();
+//				this.setImage(new Blob(newImageData));
+//				pm = PMF.get().getPersistenceManager();
+//                pm.makePersistent(this);
+//                pm.close();
 				break;
 			case FLIP_H:
 				transform = ImagesServiceFactory.makeHorizontalFlip();
