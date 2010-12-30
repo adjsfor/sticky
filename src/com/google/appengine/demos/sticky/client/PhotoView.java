@@ -7,6 +7,7 @@ import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Surface;
+import com.google.appengine.demos.sticky.client.model.Transformation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -96,7 +97,7 @@ public class PhotoView extends VerticalPanel implements Model.DataObserver {
                     
                     try {
                         int hash = Integer.parseInt(event.getResults());
-                        model.updateNoteImage(note, hash);
+                        model.updateNoteImage(note, hash, Transformation.NONE);
                         callback.callback();
                     } catch (NumberFormatException e) {
                         //do nothing
