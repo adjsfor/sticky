@@ -4,3 +4,4 @@ war/WEB-INF/classes/
 war/WEB-INF/appengine-generated/
 war/sticky/
 build.properties
+.orig
