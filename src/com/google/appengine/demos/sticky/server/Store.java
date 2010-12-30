@@ -35,7 +35,12 @@ import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.images.Image;
+import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.images.Transform;
 import com.google.appengine.api.users.User;
+import com.google.appengine.demos.sticky.client.model.Transformation;
 
 /**
  * An application specific Api wrapper around the {@link DatastoreService}.
@@ -646,6 +651,72 @@ public class Store {
             return image;
         }
         
+        public void transform(Transformation transformation) {
+        	System.out.println("Transforming picture: " + transformation);
+			ImagesService imagesService = ImagesServiceFactory
+					.getImagesService();
+			Image oldImage = ImagesServiceFactory.makeImage(this.getImage()
+					.getBytes());
+			Image newImage;
+			Transform transform;
+			byte[] newImageData = null;
+			PersistenceManager pm = PMF.get().getPersistenceManager();
+			switch (transformation) {
+			case CROP:
+				double leftX = 0.;
+				double topY = 0.;
+				double rightX = 0.;
+				double bottomY = 0.;
+				transform = ImagesServiceFactory.makeCrop(leftX, topY, rightX,
+						bottomY);
+				newImage = imagesService.applyTransform(transform, oldImage);
+				newImageData = newImage.getImageData();
+				this.setImage(new Blob(newImageData));
+				pm = PMF.get().getPersistenceManager();
+                pm.makePersistent(this);
+                pm.close();
+				break;
+			case FLIP_H:
+				transform = ImagesServiceFactory.makeHorizontalFlip();
+				newImage = imagesService.applyTransform(transform, oldImage);
+				newImageData = newImage.getImageData();
+				this.setImage(new Blob(newImageData));
+				pm = PMF.get().getPersistenceManager();
+                pm.makePersistent(this);
+                pm.close();
+				break;
+			case FLIP_V:
+				transform = ImagesServiceFactory.makeVerticalFlip();
+				newImage = imagesService.applyTransform(transform, oldImage);
+				newImageData = newImage.getImageData();
+				this.setImage(new Blob(newImageData));
+				pm = PMF.get().getPersistenceManager();
+                pm.makePersistent(this);
+                pm.close();
+				break;
+			case ROT_C:
+				transform = ImagesServiceFactory.makeRotate(90);
+				newImage = imagesService.applyTransform(transform, oldImage);
+				newImageData = newImage.getImageData();
+				this.setImage(new Blob(newImageData));
+				pm = PMF.get().getPersistenceManager();
+                pm.makePersistent(this);
+                pm.close();
+				break;
+			case ROT_CC:
+				transform = ImagesServiceFactory.makeRotate(90);
+				newImage = imagesService.applyTransform(transform, oldImage);
+				newImageData = newImage.getImageData();
+				this.setImage(new Blob(newImageData));
+                pm.makePersistent(this);
+                pm.close();
+				break;
+			case NONE:
+				break;
+			default:
+				break;
+			}
+		}
     }
     
     /**

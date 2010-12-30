@@ -33,6 +33,7 @@ import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Service;
 import com.google.appengine.demos.sticky.client.model.Surface;
+import com.google.appengine.demos.sticky.client.model.Transformation;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -204,6 +205,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
             }
             
             note.setComments(sComments);
+            
             final Date result = api.saveNote(note).getLastUpdatedAt();
             tx.commit();
             
@@ -216,7 +218,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     }
     
     @Override
-    public Date changeNotePhoto(String noteKey, int hash) throws AccessDeniedException {
+    public Date changeNotePhoto(String noteKey, int hash, Transformation transformation) throws AccessDeniedException {
         final User user = tryGetCurrentUser(UserServiceFactory.getUserService());
         final Store.Api api = store.getApi();
         try {
@@ -233,6 +235,11 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
             
             System.out.println("SeviceImpl: " + hash);
             note.setHashCode(hash);
+            
+            //TODO Transformation
+            if(transformation.compareTo(Transformation.NONE) != 0 ){
+            	api.getPhoto(key).transform(transformation);
+            }
             
             final Date result = api.saveNote(note).getLastUpdatedAt();
             tx.commit();
