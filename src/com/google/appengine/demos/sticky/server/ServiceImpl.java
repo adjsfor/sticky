@@ -22,8 +22,13 @@ import java.util.List;
 
 import javax.jdo.Transaction;
 
+import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.images.Image;
+import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.images.Transform;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
@@ -226,23 +231,27 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
             final Key key = KeyFactory.stringToKey(noteKey);
             final Store.Author me = api.getOrCreateNewAuthor(user);
             // Start a transaction for the Note we're updating.
-            final Transaction tx = api.begin();
+//            final Transaction tx = api.begin();
             final Store.Note note = api.getNote(key);
             
             if (!note.isOwnedBy(me)) {
                 throw new Service.AccessDeniedException();
             }
+
             
             System.out.println("SeviceImpl: " + hash);
             note.setHashCode(hash);
             
             //TODO Transformation
-            if(transformation.compareTo(Transformation.NONE) != 0 && note.getHashCode() != 0){
-            	note.getPhoto().transform(transformation);
+            if(transformation.compareTo(Transformation.NONE) != 0 && hash != 0){
+                final Store.Photo photo = api.getPhoto(hash);
+            	this.transform(photo, transformation);
+            	api.savePhoto(photo);
             }
             
+            
             final Date result = api.saveNote(note).getLastUpdatedAt();
-            tx.commit();
+//            tx.commit();
             
             // Invalidate the notes cache for the surface that owns this Note.
             cache.deleteNotes(getSurfaceKey(note));
@@ -251,6 +260,66 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
             api.close();
         }
     }
+    
+    public void transform(Store.Photo photo, Transformation transformation) {
+        System.out.println("Transforming picture: " + transformation);
+                ImagesService imagesService = ImagesServiceFactory
+                                .getImagesService();
+                Image oldImage = ImagesServiceFactory.makeImage(photo.getImage()
+                                .getBytes());
+                Image newImage;
+                Transform transform;
+                byte[] newImageData = null;
+                switch (transformation) {
+                case CROP:
+                        //TODO Crop
+//                      double leftX = 0.;
+//                      double topY = 0.;
+//                      double rightX = 0.;
+//                      double bottomY = 0.;
+//                      transform = ImagesServiceFactory.makeCrop(leftX, topY, rightX,
+//                                      bottomY);
+//                      newImage = imagesService.applyTransform(transform, oldImage);
+//                      newImageData = newImage.getImageData();
+//                      this.setImage(new Blob(newImageData));
+//                      pm.makePersistent(this);
+//                      pm.close();
+                        break;
+                case LUCKY: 
+                        transform = ImagesServiceFactory.makeImFeelingLucky();
+                        newImage = imagesService.applyTransform(transform, oldImage);
+                        newImageData = newImage.getImageData();
+                        photo.setImage(new Blob(newImageData));
+                case FLIP_H:
+                        transform = ImagesServiceFactory.makeHorizontalFlip();
+                        newImage = imagesService.applyTransform(transform, oldImage);
+                        newImageData = newImage.getImageData();
+                        photo.setImage(new Blob(newImageData));
+                        break;
+                case FLIP_V:
+                        transform = ImagesServiceFactory.makeVerticalFlip();
+                        newImage = imagesService.applyTransform(transform, oldImage);
+                        newImageData = newImage.getImageData();
+                        photo.setImage(new Blob(newImageData));
+                        break;
+                case ROT_C:
+                        transform = ImagesServiceFactory.makeRotate(90);
+                        newImage = imagesService.applyTransform(transform, oldImage);
+                        newImageData = newImage.getImageData();
+                        photo.setImage(new Blob(newImageData));
+                        break;
+                case ROT_CC:
+                        transform = ImagesServiceFactory.makeRotate(-90);
+                        newImage = imagesService.applyTransform(transform, oldImage);
+                        newImageData = newImage.getImageData();
+                        photo.setImage(new Blob(newImageData));
+                        break;
+                case NONE:
+                        break;
+                default:
+                        break;
+                }
+        }
     
     public Date changeNotePosition(final String noteKey, final int x, final int y, final int width, final int height)
         throws AccessDeniedException {
