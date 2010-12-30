@@ -1,6 +1,8 @@
 package com.google.appengine.demos.sticky.client;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
@@ -10,13 +12,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageBundle;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class PhotoTransformView extends HorizontalPanel {
+    
+    private static final Logger LOG = Logger.getLogger(PhotoTransformView.class.toString());
 
 	/**
 	 * Declaration of image bundle resources used in this widget.
@@ -47,10 +49,11 @@ public class PhotoTransformView extends HorizontalPanel {
 
 		this.model = model;
 		this.note = note;
-		final List<Comment> comments = this.note.getComments();
 		//System.out.println("Created photoTransformView!");
-		if (note.getAuthorName().equals("You") && this.note.getHashCode() != null && this.note.getHashCode() != 0) {
+		LOG.log(Level.INFO, "Hash: " + this.note.getHashCode());
+		if (this.note.getAuthorName().equals("You") && this.note.getHashCode() != null && this.note.getHashCode() != 0) {
 			//System.out.println("I am the owner...");
+		    
 			final Element elem = getElement();
 			elem.setId("image-panel");
 			final Images images = GWT.create(Images.class);
@@ -60,7 +63,7 @@ public class PhotoTransformView extends HorizontalPanel {
 					new ClickHandler() {
 						public void onClick(ClickEvent event) {
 							// TODO crop image
-							model.updateNoteImage(note, 1,
+							model.updateNoteImage(PhotoTransformView.this.note, PhotoTransformView.this.note.getHashCode(),
 									Transformation.CROP);
 						}
 					}));
@@ -69,7 +72,7 @@ public class PhotoTransformView extends HorizontalPanel {
 					.headerImageFlipH().createImage(), "flip-h-button",
 					new ClickHandler() {
 						public void onClick(ClickEvent event) {
-							model.updateNoteImage(note, 1,
+						    model.updateNoteImage(PhotoTransformView.this.note, PhotoTransformView.this.note.getHashCode(),
 									Transformation.FLIP_H);
 						}
 					}));
@@ -78,7 +81,7 @@ public class PhotoTransformView extends HorizontalPanel {
 					.headerImageFlipV().createImage(), "flip-v-button",
 					new ClickHandler() {
 						public void onClick(ClickEvent event) {
-							model.updateNoteImage(note, 1,
+						    model.updateNoteImage(PhotoTransformView.this.note, PhotoTransformView.this.note.getHashCode(),
 									Transformation.FLIP_V);
 						}
 					}));
@@ -87,7 +90,7 @@ public class PhotoTransformView extends HorizontalPanel {
 					.headerImageRotateC().createImage(), "rotate-c-button",
 					new ClickHandler() {
 						public void onClick(ClickEvent event) {
-							model.updateNoteImage(note, 1,
+						    model.updateNoteImage(PhotoTransformView.this.note, PhotoTransformView.this.note.getHashCode(),
 									Transformation.ROT_C);
 						}
 					}));
@@ -96,7 +99,7 @@ public class PhotoTransformView extends HorizontalPanel {
 					.headerImageRotateCc().createImage(), "rotate-cc-button",
 					new ClickHandler() {
 						public void onClick(ClickEvent event) {
-							model.updateNoteImage(note, 1,
+						    model.updateNoteImage(PhotoTransformView.this.note, PhotoTransformView.this.note.getHashCode(),
 									Transformation.ROT_CC);
 						}
 					}));

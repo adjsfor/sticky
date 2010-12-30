@@ -179,6 +179,10 @@ public class Store {
             return manager.makePersistent(note);
         }
         
+        public Photo savePhoto(Photo photo) {
+            return manager.makePersistent(photo);
+        }
+        
         /**
          * Persist a surface to the data store.
          * 
@@ -210,6 +214,15 @@ public class Store {
         
         public Photo getPhoto(Key key) {
             return this.manager.getObjectById(Photo.class, key);
+        }
+        
+      //TODO Make this work.
+        public Photo getPhoto(int hash){
+                Query query = this.manager.newQuery(Store.Photo.class);
+                query.setFilter("hashCode == paramName");
+                query.declareParameters("int paramName");
+                Store.Photo photo = ((List<Store.Photo>) query.execute(hash)).get(0);
+                return photo;
         }
     }
     
@@ -578,15 +591,7 @@ public class Store {
         /**
          * Get the associated photo
          */
-        //TODO Make this work.
-        public Photo getPhoto(){
-        	PersistenceManager pm = PMF.get().getPersistenceManager();
-        	Query query = pm.newQuery(Store.Photo.class);
-        	query.setFilter("hashCode == paramName");
-        	query.declareParameters("int paramName");
-        	Store.Photo photo = ((List<Store.Photo>) query.execute(this.getKey().hashCode())).get(0);
-        	return photo;
-        }
+        
     }
     
     @PersistenceCapable(identityType = IdentityType.APPLICATION)
@@ -665,72 +670,6 @@ public class Store {
             return image;
         }
         
-        public void transform(Transformation transformation) {
-        	System.out.println("Transforming picture: " + transformation);
-			ImagesService imagesService = ImagesServiceFactory
-					.getImagesService();
-			Image oldImage = ImagesServiceFactory.makeImage(this.getImage()
-					.getBytes());
-			Image newImage;
-			Transform transform;
-			byte[] newImageData = null;
-			PersistenceManager pm = PMF.get().getPersistenceManager();
-			switch (transformation) {
-			case CROP:
-				//TODO Crop
-//				double leftX = 0.;
-//				double topY = 0.;
-//				double rightX = 0.;
-//				double bottomY = 0.;
-//				transform = ImagesServiceFactory.makeCrop(leftX, topY, rightX,
-//						bottomY);
-//				newImage = imagesService.applyTransform(transform, oldImage);
-//				newImageData = newImage.getImageData();
-//				this.setImage(new Blob(newImageData));
-//				pm = PMF.get().getPersistenceManager();
-//                pm.makePersistent(this);
-//                pm.close();
-				break;
-			case FLIP_H:
-				transform = ImagesServiceFactory.makeHorizontalFlip();
-				newImage = imagesService.applyTransform(transform, oldImage);
-				newImageData = newImage.getImageData();
-				this.setImage(new Blob(newImageData));
-				pm = PMF.get().getPersistenceManager();
-                pm.makePersistent(this);
-                pm.close();
-				break;
-			case FLIP_V:
-				transform = ImagesServiceFactory.makeVerticalFlip();
-				newImage = imagesService.applyTransform(transform, oldImage);
-				newImageData = newImage.getImageData();
-				this.setImage(new Blob(newImageData));
-				pm = PMF.get().getPersistenceManager();
-                pm.makePersistent(this);
-                pm.close();
-				break;
-			case ROT_C:
-				transform = ImagesServiceFactory.makeRotate(90);
-				newImage = imagesService.applyTransform(transform, oldImage);
-				newImageData = newImage.getImageData();
-				this.setImage(new Blob(newImageData));
-                pm.makePersistent(this);
-                pm.close();
-				break;
-			case ROT_CC:
-				transform = ImagesServiceFactory.makeRotate(90);
-				newImage = imagesService.applyTransform(transform, oldImage);
-				newImageData = newImage.getImageData();
-				this.setImage(new Blob(newImageData));
-                pm.makePersistent(this);
-                pm.close();
-				break;
-			case NONE:
-				break;
-			default:
-				break;
-			}
-		}
     }
     
     /**
