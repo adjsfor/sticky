@@ -34,6 +34,7 @@ import javax.jdo.annotations.PrimaryKey;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.images.Image;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.images.ImagesServiceFactory;
@@ -50,196 +51,616 @@ import com.google.appengine.demos.sticky.client.model.Transformation;
  * 
  */
 public class Store {
+    
+    public class Api {
+        
+        /**
+         * The JDO persistence manager used for all calls.
+         */
+        private final PersistenceManager manager;
+        
+        private Api() {
+            manager = factory.getPersistenceManager();
+        }
+        
+        /**
+         * Begin a new transaction.
+         * 
+         * @return the transaction
+         */
+        public Transaction begin() {
+            final Transaction tx = manager.currentTransaction();
+            tx.begin();
+            return tx;
+        }
+        
+        /**
+         * Close the connection to the data store. Clients are expected to
+         * guarantee that close will be called. This will also rollback any
+         * active transaction.
+         */
+        public void close() {
+            final Transaction tx = manager.currentTransaction();
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            manager.close();
+        }
+        
+        /**
+         * Gets the author by email.
+         * 
+         * @param email
+         *            the author's email
+         * @return the author
+         * @throws JDOObjectNotFoundException
+         */
+        public Author getAuthor(String email) {
+            return manager.getObjectById(Author.class, email);
+        }
+        
+        /**
+         * Gets a note from the data store.
+         * 
+         * @param key
+         *            the note's key
+         * @return
+         */
+        public Note getNote(Key key) {
+            return manager.getObjectById(Note.class, key);
+        }
+        
+        /**
+         * Looks in the data store for an author with a matching email. If the
+         * author does not exist, a new one will be created. The newly created
+         * author will also have access to a newly created surface.
+         * 
+         * @param user
+         *            the user for which an author object is needed
+         * @return an author object
+         */
+        public Author getOrCreateNewAuthor(User user) {
+            try {
+                return getAuthor(user.getEmail());
+            } catch (JDOObjectNotFoundException e) {
+                // If an author wasn't found, we create a new one and save it to
+                // the
+                // store.
+                
+                // First, persist a default surface for the author.
+                final Transaction txA = begin();
+                final Surface surface = new Surface("My First Surface");
+                surface.addAuthorName(user.getNickname());
+                saveSurface(surface);
+                txA.commit();
+                
+                // Then, create a new author based on the information in user.
+                final Transaction txB = begin();
+                final Author author = new Author(user.getEmail(), user.getNickname());
+                author.addSurface(surface);
+                saveAuthor(author);
+                txB.commit();
+                return author;
+            }
+        }
+        
+        /**
+         * Gets a surface from the data store.
+         * 
+         * @param key
+         *            the surface's key
+         * @return
+         */
+        public Surface getSurface(Key key) {
+            return manager.getObjectById(Surface.class, key);
+        }
+        
+        /**
+         * Persist an author to the data store.
+         * 
+         * @param author
+         *            the author to be persisted
+         * @return <code>author</code>, for call chaining
+         */
+        public Author saveAuthor(Author author) {
+            return manager.makePersistent(author);
+        }
+        
+        /**
+         * Persist a note to the data store.
+         * 
+         * @param note
+         *            the note to be persisted
+         * @return <code>note</code>, for call chaining
+         */
+        public Note saveNote(Note note) {
+            note.lastUpdatedAt = new Date();
+            return manager.makePersistent(note);
+        }
+        
+        /**
+         * Persist a surface to the data store.
+         * 
+         * @param surface
+         *            the surface to be persisted
+         * @return <code>surface</code>, for call chaining
+         */
+        public Surface saveSurface(Surface surface) {
+            // Update the last updated value before saving.
+            surface.lastUpdatedAt = new Date();
+            return manager.makePersistent(surface);
+        }
+        
+        /**
+         * Attempts to get the author with the given email. If there is no known
+         * author with that email, <code>null</code> will be returned.
+         * 
+         * @param email
+         *            the author's email
+         * @return the author or <code>null</code> if the author can't be found
+         */
+        public Author tryGetAuthor(String email) {
+            try {
+                return getAuthor(email);
+            } catch (JDOObjectNotFoundException e) {
+                return null;
+            }
+        }
+        
+        public Photo getPhoto(Key key) {
+            return this.manager.getObjectById(Photo.class, key);
+        }
+    }
+    
+    /**
+     * An ORM object representing an author.
+     */
+    @PersistenceCapable(identityType = IdentityType.APPLICATION)
+    public static class Author {
+        /**
+         * The author's email. Serves as the primary key for this object.
+         */
+        @PrimaryKey
+        private String email;
+        
+        /**
+         * The author's name.
+         */
+        @Persistent
+        private String name;
+        
+        /**
+         * The keys of all surfaces this author has access to.
+         */
+        @Persistent(defaultFetchGroup = "true")
+        @Element(dependent = "true")
+        private List<Key> surfaceKeys = new ArrayList<Key>();
+        
+        /**
+         * Construct a new author.
+         * 
+         * @param email
+         *            the author's email
+         * @param name
+         *            the author's name
+         */
+        public Author(String email, String name) {
+            this.name = name;
+            setEmail(email);
+        }
+        
+        /**
+         * Give this author access to a surface.
+         * 
+         * @param surface
+         *            the surface the author is being granted access to.
+         */
+        public void addSurface(Surface surface) {
+            final List<Key> keys = new ArrayList<Key>(surfaceKeys);
+            keys.add(surface.getKey());
+            setSurfaceKeys(keys);
+        }
+        
+        /**
+         * Gets the author's email.
+         * 
+         * @return
+         */
+        public String getEmail() {
+            return email;
+        }
+        
+        /**
+         * Gets the author's name.
+         * 
+         * @return
+         */
+        public String getName() {
+            return name;
+        }
+        
+        /**
+         * Returns the keys for each surface that the author has access to.
+         * 
+         * @return
+         */
+        public List<Key> getSurfaceKeys() {
+            return surfaceKeys;
+        }
+        
+        /**
+         * Returns whether this author has access to a particular surface.
+         * 
+         * @param surfaceKey
+         *            the key of the surface
+         * @return <code>true</code> if the author does have access,
+         *         <code>false</code> otherwise
+         */
+        public boolean hasSurface(Key surfaceKey) {
+            for (Key key : surfaceKeys) {
+                if (key.equals(surfaceKey)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        /**
+         * Sets the author's email.
+         * 
+         * @param email
+         */
+        public void setEmail(String email) {
+            this.email = email;
+        }
+        
+        /**
+         * Sets the author's name.
+         * 
+         * @param name
+         */
+        public void setName(String name) {
+            this.name = name;
+        }
+        
+        /**
+         * Reassigns the collection of surface keys. This is required to ensure
+         * that the ORM will persist element collections.
+         * 
+         * @param keys
+         */
+        private void setSurfaceKeys(List<Key> keys) {
+            surfaceKeys = keys;
+        }
+    }
+    
+    /**
+     * An ORM object representing a note.
+     */
+    @PersistenceCapable(identityType = IdentityType.APPLICATION)
+    public static class Note {
+        /**
+         * An auto-generated primary key for this object. This key will be a
+         * child key of the owning surface's key.
+         */
+        @PrimaryKey
+        @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+        private Key key;
+        
+        /**
+         * The x position of the note.
+         */
+        @Persistent
+        private int x;
+        
+        /**
+         * The y position of the note.
+         */
+        @Persistent
+        private int y;
+        
+        /**
+         * The width of the note.
+         * 
+         * <p>
+         * NOTE: The application does not currently provide the ability to
+         * resize notes.
+         * </p>
+         */
+        @Persistent
+        private int width;
+        
+        /**
+         * The height of the note
+         * 
+         * <p>
+         * NOTE: The application does not currently provide the ability to
+         * resize notes.
+         * </p>
+         */
+        @Persistent
+        private int height;
+        
+        /**
+         * The text content of the note.
+         */
+        @Element(dependent = "true")
+        private List<Comment> comments = new ArrayList<Comment>();
+        
+        @Persistent
+        private int hashCode;
+        
+        /**
+         * The date of the last time this object was persisted.
+         */
+        @Persistent
+        private Date lastUpdatedAt = new Date();
+        
+        /**
+         * The email of the author created this note.
+         */
+        @Persistent
+        private String authorEmail;
+        
+        /**
+         * The name of the author who created this note.
+         */
+        @Persistent
+        private String authorName;
+        
+        /**
+         * Create a new note.
+         * 
+         * @param owner
+         *            the author who created this note
+         * @param x
+         * @param y
+         * @param width
+         * @param height
+         */
+        public Note(Author owner, int x, int y, int width, int height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            authorEmail = owner.getEmail();
+            authorName = owner.getName();
+        }
+        
+        /**
+         * The author's email.
+         * 
+         * @return
+         */
+        public String getAuthorEmail() {
+            return authorEmail;
+        }
+        
+        /**
+         * The author's name.
+         * 
+         * @return
+         */
+        public String getAuthorName() {
+            return authorName;
+        }
+        
+        /**
+         * The text of the note. This value is not escaped in anyway and should
+         * never be used as html on the client.
+         * 
+         * @return unsafe text content
+         */
+        public List<Comment> getComments() {
+            return comments;
+        }
+        
+        public int getHashCode() {
+            return hashCode;
+        }
+        
+        public void setHashCode(int hash) {
+            this.hashCode = hash;
+        }
+        
+        /**
+         * Gets the height of the note.
+         * 
+         * @return
+         */
+        public int getHeight() {
+            return height;
+        }
+        
+        /**
+         * Gets the object's primary key.
+         * 
+         * @return
+         */
+        public Key getKey() {
+            return key;
+        }
+        
+        /**
+         * Gets the date of the last time this object was persisted.
+         * 
+         * @return
+         */
+        public Date getLastUpdatedAt() {
+            return lastUpdatedAt;
+        }
+        
+        /**
+         * Gets the width of the note.
+         * 
+         * @return
+         */
+        public int getWidth() {
+            return width;
+        }
+        
+        /**
+         * Gets the x position of the note.
+         * 
+         * @return
+         */
+        public int getX() {
+            return x;
+        }
+        
+        /**
+         * Gets the y position of the note.
+         * 
+         * @return
+         */
+        public int getY() {
+            return y;
+        }
+        
+        /**
+         * Indicates whether the given author is the owner of this note.
+         * 
+         * @param author
+         *            the author
+         * @return <code>true</code> if <code>author</code> is the owner of the
+         *         note, <code>false</code> otherwise.
+         */
+        public boolean isOwnedBy(Author author) {
+            return author.getEmail().equals(authorEmail);
+        }
+        
+        /**
+         * Sets the content.
+         * 
+         * @param content
+         */
+        public void setComments(List<Comment> comments) {
+            this.comments = comments;
+        }
+        
+        /**
+         * Sets the height of the note.
+         * 
+         * @param height
+         */
+        public void setHeight(int height) {
+            this.height = height;
+        }
+        
+        /**
+         * Sets the width of the note.
+         * 
+         * @param width
+         */
+        public void setWidth(int width) {
+            this.width = width;
+        }
+        
+        /**
+         * Sets the x position of the note.
+         * 
+         * @param x
+         */
+        public void setX(int x) {
+            this.x = x;
+        }
+        
+        /**
+         * Sets the y position of the note.
+         * 
+         * @param y
+         */
+        public void setY(int y) {
+            this.y = y;
+        }
+    }
+    
+    @PersistenceCapable(identityType = IdentityType.APPLICATION)
+    public static class Comment {
+        @PrimaryKey
+        @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+        private Key key;
+        
+        @Persistent
+        private String text;
+        
+        @Persistent
+        private String user;
+        
+        public Comment(String user, String text) {
+            this.user = user;
+            this.text = text;
+        }
+        
+        public Key getKey() {
+            return key;
+        }
+        
+        public String getText() {
+            return text;
+        }
+        
+        public void setText(String text) {
+            this.text = text;
+        }
+        
+        public String getUser() {
+            return user;
+        }
+        
+        public void setUser(String user) {
+            this.user = user;
+        }
+        
+    }
+    
+    @PersistenceCapable(identityType = IdentityType.APPLICATION)
+    public static class Photo {
 
-	public class Api {
-
-		/**
-		 * The JDO persistence manager used for all calls.
-		 */
-		private final PersistenceManager manager;
-
-		private Api() {
-			manager = factory.getPersistenceManager();
-		}
-
-		/**
-		 * Begin a new transaction.
-		 * 
-		 * @return the transaction
-		 */
-		public Transaction begin() {
-			final Transaction tx = manager.currentTransaction();
-			tx.begin();
-			return tx;
-		}
-
-		/**
-		 * Close the connection to the data store. Clients are expected to
-		 * guarantee that close will be called. This will also rollback any
-		 * active transaction.
-		 */
-		public void close() {
-			final Transaction tx = manager.currentTransaction();
-			if (tx.isActive()) {
-				tx.rollback();
-			}
-			manager.close();
-		}
-
-		/**
-		 * Gets the author by email.
-		 * 
-		 * @param email
-		 *            the author's email
-		 * @return the author
-		 * @throws JDOObjectNotFoundException
-		 */
-		public Author getAuthor(String email) {
-			return manager.getObjectById(Author.class, email);
-		}
-
-		/**
-		 * Gets a note from the data store.
-		 * 
-		 * @param key
-		 *            the note's key
-		 * @return
-		 */
-		public Note getNote(Key key) {
-			return manager.getObjectById(Note.class, key);
-		}
-
-		/**
-		 * Looks in the data store for an author with a matching email. If the
-		 * author does not exist, a new one will be created. The newly created
-		 * author will also have access to a newly created surface.
-		 * 
-		 * @param user
-		 *            the user for which an author object is needed
-		 * @return an author object
-		 */
-		public Author getOrCreateNewAuthor(User user) {
-			try {
-				return getAuthor(user.getEmail());
-			} catch (JDOObjectNotFoundException e) {
-				// If an author wasn't found, we create a new one and save it to
-				// the
-				// store.
-
-				// First, persist a default surface for the author.
-				final Transaction txA = begin();
-				final Surface surface = new Surface("My First Surface");
-				surface.addAuthorName(user.getNickname());
-				saveSurface(surface);
-				txA.commit();
-
-				// Then, create a new author based on the information in user.
-				final Transaction txB = begin();
-				final Author author = new Author(user.getEmail(),
-						user.getNickname());
-				author.addSurface(surface);
-				saveAuthor(author);
-				txB.commit();
-				return author;
-			}
-		}
-
-		/**
-		 * Gets a surface from the data store.
-		 * 
-		 * @param key
-		 *            the surface's key
-		 * @return
-		 */
-		public Surface getSurface(Key key) {
-			return manager.getObjectById(Surface.class, key);
-		}
-
-		/**
-		 * Persist an author to the data store.
-		 * 
-		 * @param author
-		 *            the author to be persisted
-		 * @return <code>author</code>, for call chaining
-		 */
-		public Author saveAuthor(Author author) {
-			return manager.makePersistent(author);
-		}
-
-		/**
-		 * Persist a note to the data store.
-		 * 
-		 * @param note
-		 *            the note to be persisted
-		 * @return <code>note</code>, for call chaining
-		 */
-		public Note saveNote(Note note) {
-			note.lastUpdatedAt = new Date();
-			return manager.makePersistent(note);
-		}
-
-		/**
-		 * Persist a surface to the data store.
-		 * 
-		 * @param surface
-		 *            the surface to be persisted
-		 * @return <code>surface</code>, for call chaining
-		 */
-		public Surface saveSurface(Surface surface) {
-			// Update the last updated value before saving.
-			surface.lastUpdatedAt = new Date();
-			return manager.makePersistent(surface);
-		}
-
-		/**
-		 * Attempts to get the author with the given email. If there is no known
-		 * author with that email, <code>null</code> will be returned.
-		 * 
-		 * @param email
-		 *            the author's email
-		 * @return the author or <code>null</code> if the author can't be found
-		 */
-		public Author tryGetAuthor(String email) {
-			try {
-				return getAuthor(email);
-			} catch (JDOObjectNotFoundException e) {
-				return null;
-			}
-		}
-	}
-
-	@PersistenceCapable(identityType = IdentityType.APPLICATION)
-	public static class Photo {
-
-		@PrimaryKey
-		@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
-		private Key key;
-		@Persistent
-		private Blob data;
-
-		public Photo() {
-		}
-
-		public Blob getData() {
-			return data;
-		}
-
-		public void setData(byte[] data) {
-			this.data = new Blob(data);
-		}
-
-		public Key getKey() {
-			return key;
-		}
-
-		public void transform(Transformation transformation) {
+        @PrimaryKey
+        @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+        private Key key;
+        
+        @Persistent
+        private Integer hashCode;
+        
+        @Persistent
+        private Blob image;
+        
+        public void setKey(Key key) {
+            this.key = key;
+        }
+        
+        public Key getKey() {
+            return key;
+        }
+        
+        public void setHashCode(int hash) {
+            this.hashCode = hash;
+        }
+        
+        public int getHashCode() {
+            return hashCode;
+        }
+        
+        public void setImage(Blob image) {
+            this.image = image;
+        }
+        
+        public Blob getImage() {
+            return image;
+        }
+        
+        public void transform(Transformation transformation) {
+        	System.out.println("Transforming picture: " + transformation);
 			ImagesService imagesService = ImagesServiceFactory
 					.getImagesService();
-			Image oldImage = ImagesServiceFactory.makeImage(this.data
+			Image oldImage = ImagesServiceFactory.makeImage(this.getImage()
 					.getBytes());
 			Image newImage;
 			Transform transform;
 			byte[] newImageData = null;
+			PersistenceManager pm = PMF.get().getPersistenceManager();
 			switch (transformation) {
 			case CROP:
 				double leftX = 0.;
@@ -250,31 +671,44 @@ public class Store {
 						bottomY);
 				newImage = imagesService.applyTransform(transform, oldImage);
 				newImageData = newImage.getImageData();
-				this.setData(newImageData);
+				this.setImage(new Blob(newImageData));
+				pm = PMF.get().getPersistenceManager();
+                pm.makePersistent(this);
+                pm.close();
 				break;
 			case FLIP_H:
 				transform = ImagesServiceFactory.makeHorizontalFlip();
 				newImage = imagesService.applyTransform(transform, oldImage);
 				newImageData = newImage.getImageData();
-				this.setData(newImageData);
+				this.setImage(new Blob(newImageData));
+				pm = PMF.get().getPersistenceManager();
+                pm.makePersistent(this);
+                pm.close();
 				break;
 			case FLIP_V:
 				transform = ImagesServiceFactory.makeVerticalFlip();
 				newImage = imagesService.applyTransform(transform, oldImage);
 				newImageData = newImage.getImageData();
-				this.setData(newImageData);
+				this.setImage(new Blob(newImageData));
+				pm = PMF.get().getPersistenceManager();
+                pm.makePersistent(this);
+                pm.close();
 				break;
 			case ROT_C:
 				transform = ImagesServiceFactory.makeRotate(90);
 				newImage = imagesService.applyTransform(transform, oldImage);
 				newImageData = newImage.getImageData();
-				this.setData(newImageData);
+				this.setImage(new Blob(newImageData));
+                pm.makePersistent(this);
+                pm.close();
 				break;
 			case ROT_CC:
 				transform = ImagesServiceFactory.makeRotate(90);
 				newImage = imagesService.applyTransform(transform, oldImage);
 				newImageData = newImage.getImageData();
-				this.setData(newImageData);
+				this.setImage(new Blob(newImageData));
+                pm.makePersistent(this);
+                pm.close();
 				break;
 			case NONE:
 				break;
@@ -282,545 +716,147 @@ public class Store {
 				break;
 			}
 		}
-	}
-
-	/**
-	 * An ORM object representing an author.
-	 */
-	@PersistenceCapable(identityType = IdentityType.APPLICATION)
-	public static class Author {
-		/**
-		 * The author's email. Serves as the primary key for this object.
-		 */
-		@PrimaryKey
-		private String email;
-
-		/**
-		 * The author's name.
-		 */
-		@Persistent
-		private String name;
-
-		/**
-		 * The keys of all surfaces this author has access to.
-		 */
-		@Persistent(defaultFetchGroup = "true")
-		@Element(dependent = "true")
-		private List<Key> surfaceKeys = new ArrayList<Key>();
-
-		/**
-		 * Construct a new author.
-		 * 
-		 * @param email
-		 *            the author's email
-		 * @param name
-		 *            the author's name
-		 */
-		public Author(String email, String name) {
-			this.name = name;
-			setEmail(email);
-		}
-
-		/**
-		 * Give this author access to a surface.
-		 * 
-		 * @param surface
-		 *            the surface the author is being granted access to.
-		 */
-		public void addSurface(Surface surface) {
-			final List<Key> keys = new ArrayList<Key>(surfaceKeys);
-			keys.add(surface.getKey());
-			setSurfaceKeys(keys);
-		}
-
-		/**
-		 * Gets the author's email.
-		 * 
-		 * @return
-		 */
-		public String getEmail() {
-			return email;
-		}
-
-		/**
-		 * Gets the author's name.
-		 * 
-		 * @return
-		 */
-		public String getName() {
-			return name;
-		}
-
-		/**
-		 * Returns the keys for each surface that the author has access to.
-		 * 
-		 * @return
-		 */
-		public List<Key> getSurfaceKeys() {
-			return surfaceKeys;
-		}
-
-		/**
-		 * Returns whether this author has access to a particular surface.
-		 * 
-		 * @param surfaceKey
-		 *            the key of the surface
-		 * @return <code>true</code> if the author does have access,
-		 *         <code>false</code> otherwise
-		 */
-		public boolean hasSurface(Key surfaceKey) {
-			for (Key key : surfaceKeys) {
-				if (key.equals(surfaceKey)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		/**
-		 * Sets the author's email.
-		 * 
-		 * @param email
-		 */
-		public void setEmail(String email) {
-			this.email = email;
-		}
-
-		/**
-		 * Sets the author's name.
-		 * 
-		 * @param name
-		 */
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		/**
-		 * Reassigns the collection of surface keys. This is required to ensure
-		 * that the ORM will persist element collections.
-		 * 
-		 * @param keys
-		 */
-		private void setSurfaceKeys(List<Key> keys) {
-			surfaceKeys = keys;
-		}
-	}
-
-	/**
-	 * An ORM object representing a note.
-	 */
-	@PersistenceCapable(identityType = IdentityType.APPLICATION)
-	public static class Note {
-		/**
-		 * An auto-generated primary key for this object. This key will be a
-		 * child key of the owning surface's key.
-		 */
-		@PrimaryKey
-		@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
-		private Key key;
-
-		/**
-		 * The x position of the note.
-		 */
-		@Persistent
-		private int x;
-
-		/**
-		 * The y position of the note.
-		 */
-		@Persistent
-		private int y;
-
-		/**
-		 * The width of the note.
-		 * 
-		 * <p>
-		 * NOTE: The application does not currently provide the ability to
-		 * resize notes.
-		 * </p>
-		 */
-		@Persistent
-		private int width;
-
-		/**
-		 * The height of the note
-		 * 
-		 * <p>
-		 * NOTE: The application does not currently provide the ability to
-		 * resize notes.
-		 * </p>
-		 */
-		@Persistent
-		private int height;
-
-		/**
-		 * The text content of the note.
-		 */
-		@Element(dependent = "true")
-		private List<Comment> comments = new ArrayList<Comment>();
-
-		@Element(dependent = "true")
-		private Photo photo;
-
-		/**
-		 * The date of the last time this object was persisted.
-		 */
-		@Persistent
-		private Date lastUpdatedAt = new Date();
-
-		/**
-		 * The email of the author created this note.
-		 */
-		@Persistent
-		private String authorEmail;
-
-		/**
-		 * The name of the author who created this note.
-		 */
-		@Persistent
-		private String authorName;
-
-		/**
-		 * Create a new note.
-		 * 
-		 * @param owner
-		 *            the author who created this note
-		 * @param x
-		 * @param y
-		 * @param width
-		 * @param height
-		 */
-		public Note(Author owner, int x, int y, int width, int height) {
-			this.x = x;
-			this.y = y;
-			this.width = width;
-			this.height = height;
-			authorEmail = owner.getEmail();
-			authorName = owner.getName();
-		}
-
-		/**
-		 * The author's email.
-		 * 
-		 * @return
-		 */
-		public String getAuthorEmail() {
-			return authorEmail;
-		}
-
-		/**
-		 * The author's name.
-		 * 
-		 * @return
-		 */
-		public String getAuthorName() {
-			return authorName;
-		}
-
-		/**
-		 * The text of the note. This value is not escaped in anyway and should
-		 * never be used as html on the client.
-		 * 
-		 * @return unsafe text content
-		 */
-		public List<Comment> getComments() {
-			return comments;
-		}
-
-		public Photo getPhoto() {
-			return photo;
-		}
-
-		/**
-		 * Gets the height of the note.
-		 * 
-		 * @return
-		 */
-		public int getHeight() {
-			return height;
-		}
-
-		/**
-		 * Gets the object's primary key.
-		 * 
-		 * @return
-		 */
-		public Key getKey() {
-			return key;
-		}
-
-		/**
-		 * Gets the date of the last time this object was persisted.
-		 * 
-		 * @return
-		 */
-		public Date getLastUpdatedAt() {
-			return lastUpdatedAt;
-		}
-
-		/**
-		 * Gets the width of the note.
-		 * 
-		 * @return
-		 */
-		public int getWidth() {
-			return width;
-		}
-
-		/**
-		 * Gets the x position of the note.
-		 * 
-		 * @return
-		 */
-		public int getX() {
-			return x;
-		}
-
-		/**
-		 * Gets the y position of the note.
-		 * 
-		 * @return
-		 */
-		public int getY() {
-			return y;
-		}
-
-		/**
-		 * Indicates whether the given author is the owner of this note.
-		 * 
-		 * @param author
-		 *            the author
-		 * @return <code>true</code> if <code>author</code> is the owner of the
-		 *         note, <code>false</code> otherwise.
-		 */
-		public boolean isOwnedBy(Author author) {
-			return author.getEmail().equals(authorEmail);
-		}
-
-		/**
-		 * Sets the content.
-		 * 
-		 * @param content
-		 */
-		public void setComments(List<Comment> comments) {
-			this.comments = comments;
-		}
-
-		/**
-		 * Sets the height of the note.
-		 * 
-		 * @param height
-		 */
-		public void setHeight(int height) {
-			this.height = height;
-		}
-
-		/**
-		 * Sets the width of the note.
-		 * 
-		 * @param width
-		 */
-		public void setWidth(int width) {
-			this.width = width;
-		}
-
-		/**
-		 * Sets the x position of the note.
-		 * 
-		 * @param x
-		 */
-		public void setX(int x) {
-			this.x = x;
-		}
-
-		/**
-		 * Sets the y position of the note.
-		 * 
-		 * @param y
-		 */
-		public void setY(int y) {
-			this.y = y;
-		}
-	}
-
-	@PersistenceCapable(identityType = IdentityType.APPLICATION)
-	public static class Comment {
-		@PrimaryKey
-		@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
-		private Key key;
-
-		@Persistent
-		private String text;
-
-		@Persistent
-		private String user;
-
-		public Comment(String user, String text) {
-			this.user = user;
-			this.text = text;
-		}
-
-		public Key getKey() {
-			return key;
-		}
-
-		public String getText() {
-			return text;
-		}
-
-		public void setText(String text) {
-			this.text = text;
-		}
-
-		public String getUser() {
-			return user;
-		}
-
-		public void setUser(String user) {
-			this.user = user;
-		}
-
-	}
-
-	/**
-	 * A JDO object representing a surface.
-	 */
-	@PersistenceCapable(identityType = IdentityType.APPLICATION)
-	public static class Surface {
-		/**
-		 * An auto-generated primary key.
-		 */
-		@PrimaryKey
-		@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
-		private Key key;
-
-		/**
-		 * The title of the surface.
-		 */
-		@Persistent
-		private String title;
-
-		/**
-		 * The date of the last time this surface was persisted.
-		 */
-		@Persistent
-		private Date lastUpdatedAt;
-
-		/**
-		 * The name of each author that has access to this surface.
-		 */
-		@Persistent(defaultFetchGroup = "true")
-		private List<String> authorNames = new ArrayList<String>();
-
-		/**
-		 * The notes that are stuck to this surface.
-		 */
-		@Element(dependent = "true")
-		private List<Note> notes = new ArrayList<Note>();
-
-		/**
-		 * Create a new surface.
-		 * 
-		 * @param title
-		 */
-		public Surface(String title) {
-			this.title = title;
-		}
-
-		/**
-		 * Add the name to the author names. Calls to this method are generally
-		 * paired with a call to {@link Author#addSurface(Surface)}.
-		 * 
-		 * @param name
-		 */
-		public void addAuthorName(String name) {
-			final List<String> names = new ArrayList<String>(authorNames);
-			names.add(name);
-			setAuthorNames(names);
-		}
-
-		/**
-		 * Gets the collection of author names.
-		 * 
-		 * @return
-		 */
-		public List<String> getAuthorNames() {
-			return authorNames;
-		}
-
-		/**
-		 * Gets the primary key for this object.
-		 * 
-		 * @return
-		 */
-		public Key getKey() {
-			return key;
-		}
-
-		/**
-		 * Gets the date of the last time this object was persisted.
-		 * 
-		 * @return
-		 */
-		public Date getLastUpdatedAt() {
-			return lastUpdatedAt;
-		}
-
-		/**
-		 * Gets all the notes that are stuck to this surface.
-		 * 
-		 * @return
-		 */
-		public List<Note> getNotes() {
-			return notes;
-		}
-
-		/**
-		 * Get the surface's title.
-		 * 
-		 * @return
-		 */
-		public String getTitle() {
-			return title;
-		}
-
-		/**
-		 * Sets the surface's title.
-		 * 
-		 * @param title
-		 */
-		public void setTitle(String title) {
-			this.title = title;
-		}
-
-		/**
-		 * Reassigns the collection of author names. This is required to ensure
-		 * that the ORM persists element collections.
-		 * 
-		 * @param names
-		 */
-		private void setAuthorNames(List<String> names) {
-			authorNames = names;
-		}
-	}
-
-	private final PersistenceManagerFactory factory;
-
-	/**
-	 * Create a new Store based on a particular config.
-	 * 
-	 * @param config
-	 */
-	public Store(String config) {
-		this.factory = JDOHelper.getPersistenceManagerFactory(config);
-	}
-
-	/**
-	 * Starts a data store session and returns an Api object to use.
-	 * 
-	 * @return
-	 */
-	public Api getApi() {
-		return new Api();
-	}
+    }
+    
+    /**
+     * A JDO object representing a surface.
+     */
+    @PersistenceCapable(identityType = IdentityType.APPLICATION)
+    public static class Surface {
+        /**
+         * An auto-generated primary key.
+         */
+        @PrimaryKey
+        @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+        private Key key;
+        
+        /**
+         * The title of the surface.
+         */
+        @Persistent
+        private String title;
+        
+        /**
+         * The date of the last time this surface was persisted.
+         */
+        @Persistent
+        private Date lastUpdatedAt;
+        
+        /**
+         * The name of each author that has access to this surface.
+         */
+        @Persistent(defaultFetchGroup = "true")
+        private List<String> authorNames = new ArrayList<String>();
+        
+        /**
+         * The notes that are stuck to this surface.
+         */
+        @Element(dependent = "true")
+        private List<Note> notes = new ArrayList<Note>();
+        
+        /**
+         * Create a new surface.
+         * 
+         * @param title
+         */
+        public Surface(String title) {
+            this.title = title;
+        }
+        
+        /**
+         * Add the name to the author names. Calls to this method are generally
+         * paired with a call to {@link Author#addSurface(Surface)}.
+         * 
+         * @param name
+         */
+        public void addAuthorName(String name) {
+            final List<String> names = new ArrayList<String>(authorNames);
+            names.add(name);
+            setAuthorNames(names);
+        }
+        
+        /**
+         * Gets the collection of author names.
+         * 
+         * @return
+         */
+        public List<String> getAuthorNames() {
+            return authorNames;
+        }
+        
+        /**
+         * Gets the primary key for this object.
+         * 
+         * @return
+         */
+        public Key getKey() {
+            return key;
+        }
+        
+        /**
+         * Gets the date of the last time this object was persisted.
+         * 
+         * @return
+         */
+        public Date getLastUpdatedAt() {
+            return lastUpdatedAt;
+        }
+        
+        /**
+         * Gets all the notes that are stuck to this surface.
+         * 
+         * @return
+         */
+        public List<Note> getNotes() {
+            return notes;
+        }
+        
+        /**
+         * Get the surface's title.
+         * 
+         * @return
+         */
+        public String getTitle() {
+            return title;
+        }
+        
+        /**
+         * Sets the surface's title.
+         * 
+         * @param title
+         */
+        public void setTitle(String title) {
+            this.title = title;
+        }
+        
+        /**
+         * Reassigns the collection of author names. This is required to ensure
+         * that the ORM persists element collections.
+         * 
+         * @param names
+         */
+        private void setAuthorNames(List<String> names) {
+            authorNames = names;
+        }
+    }
+    
+    private final PersistenceManagerFactory factory;
+    
+    /**
+     * Create a new Store based on a particular config.
+     * 
+     * @param config
+     */
+    public Store(String config) {
+        this.factory = PMF.get();
+    }
+    
+    /**
+     * Starts a data store session and returns an Api object to use.
+     * 
+     * @return
+     */
+    public Api getApi() {
+        return new Api();
+    }
 }

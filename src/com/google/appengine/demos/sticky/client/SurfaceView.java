@@ -18,9 +18,7 @@ package com.google.appengine.demos.sticky.client;
 import com.google.appengine.demos.sticky.client.model.Comment;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
-import com.google.appengine.demos.sticky.client.model.Photo;
 import com.google.appengine.demos.sticky.client.model.Surface;
-import com.google.appengine.demos.sticky.client.model.Transformation;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.EventTarget;
@@ -36,6 +34,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -69,6 +68,9 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
         private PhotoView photoView;
         
         private PhotoTransformView photoTransformView;
+        
+        private VerticalPanel panel;
+        
         /**
          * @param note
          *            the note to render
@@ -84,18 +86,18 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             titleElement = elem.appendChild(Document.get().createDivElement());
             titleElement.setClassName("note-title");
             
-            VerticalPanel vPanel = new VerticalPanel();
-
+            panel = new VerticalPanel();
+            
+            photoView = new PhotoView(model, note, new Callback() {
+                public void callback() {
+                    render();
+                }
+            });
             photoTransformView = new PhotoTransformView(model, note);
-            vPanel.add(photoTransformView);
-            
-            photoView = new PhotoView(model, note);
-            vPanel.add(photoView);
-            
+            panel.add(photoTransformView);
             pnlComments = new CommentView(model, note);
-            vPanel.add(pnlComments);
-                        
-            add(vPanel);
+            
+            add(panel);
             
             render();
             
@@ -165,6 +167,14 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             setPixelPosition(note.getX(), note.getY());
             setPixelSize(note.getWidth(), note.getHeight());
             titleElement.setInnerHTML(note.getAuthorName());
+            Image photo = photoView.getPhoto();
+            if (photo != null) {
+                panel.remove(photoView);
+                panel.add(photo);
+            } else {
+                panel.add(photoView.getFileUploaderWidget());
+            }
+            panel.add(pnlComments);
             
         }
         
@@ -234,13 +244,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
     
     @Override
     public void onCommentAdded(Comment comment) {
-        // TODO Auto-generated method stub
         
     }
-
-	@Override
-	public void onPhotoTransform(Photo photo, Transformation transformation) {
-		// TODO Auto-generated method stub
-		
-	}
+    
 }

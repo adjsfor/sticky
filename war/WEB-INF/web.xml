@@ -4,20 +4,20 @@
   <welcome-file-list>
     <welcome-file>Sticky.html</welcome-file>
   </welcome-file-list>
-
-  <servlet>
-    <servlet-name>service</servlet-name>
-    <servlet-class>com.google.appengine.demos.sticky.server.ServiceImpl</servlet-class>
-  </servlet>
   
   <servlet>
   	<servlet-name>fileUpload</servlet-name>
   	<servlet-class>com.google.appengine.demos.sticky.server.FileUploadServlet</servlet-class>
   </servlet>
 
+<servlet>
+    <servlet-name>photoRetriever</servlet-name>
+    <servlet-class>com.google.appengine.demos.sticky.server.PhotoRetrieverServlet</servlet-class>
+  </servlet>
+
   <servlet-mapping>
-    <servlet-name>service</servlet-name>
-    <url-pattern>/sticky/service</url-pattern>
+    <servlet-name>photoRetriever</servlet-name>
+    <url-pattern>/sticky/photos</url-pattern>
   </servlet-mapping>
   
   <servlet-mapping>

@@ -47,6 +47,9 @@
     <copy todir="war/WEB-INF/lib">
           <fileset file="${sticky.lib}/commons-fileupload-1.2.2.jar" />
     </copy>
+  	<copy todir="war/WEB-INF/lib">
+  	          <fileset file="${sticky.lib}/commons-io-1.4.jar" />
+  	</copy>
   </target>
 
   <target name="compile.init">
