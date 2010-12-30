@@ -139,6 +139,10 @@ public class Surface implements Serializable {
   public void addObserver(Observer observer) {
     observers.add(observer);
   }
+  
+  public void incrementNoteCount() {
+	  noteCount++;
+  }
 
   /**
    * Returns the nick names of all authors on a surface.

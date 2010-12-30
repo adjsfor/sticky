@@ -752,4 +752,5 @@ public class Model {
         taskQueue.post(new UpdateNotePhotoTask(note, results, transformation));
         
     }
+    
 }

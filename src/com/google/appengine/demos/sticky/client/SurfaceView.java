@@ -169,8 +169,9 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
             titleElement.setInnerHTML(note.getAuthorName());
             Image photo = photoView.getPhoto();
             if (photo != null) {
-                panel.remove(photoView);
-                panel.add(photo);
+                //panel.remove(photoView);
+                panel.clear();
+            	panel.add(photo);
             } else {
                 panel.add(photoView.getFileUploaderWidget());
             }
@@ -205,6 +206,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver {
         final NoteView view = new NoteView(note);
         add(view);
         select(view);
+        model.getSelectedSurface().incrementNoteCount();
     }
     
     public void onSurfaceCreated(Surface group) {

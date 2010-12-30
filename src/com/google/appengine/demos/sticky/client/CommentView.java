@@ -54,12 +54,14 @@ public class CommentView extends VerticalPanel implements KeyDownHandler, Model.
         
         if (keyCode == KeyCodes.KEY_ENTER && !event.isShiftKeyDown()) {
             final String text = this.taComment.getText();
-            this.taComment.setText("");
-            
-            final Comment comment = new Comment(this.note.getKey(), this.model.getCurrentAuthor().getName(), text);
-            this.addComment(comment);
-            this.comments.add(comment);
-            this.model.updateNoteContent(this.note, this.comments);
+            if(text.trim().length() > 0) {
+	            this.taComment.setText("");
+	            
+	            final Comment comment = new Comment(this.note.getKey(), this.model.getCurrentAuthor().getName(), text);
+	            this.addComment(comment);
+	            this.comments.add(comment);
+	            this.model.updateNoteContent(this.note, this.comments);
+            }
         }
     }
     
