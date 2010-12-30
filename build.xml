@@ -45,7 +45,7 @@
       <fileset file="${gwt.sdk}/gwt-servlet.jar" />
     </copy>
     <copy todir="war/WEB-INF/lib">
-          <fileset file="${sticky.lib}" includes="**/*.jar" />
+          <fileset dir="${sticky.lib}" includes="**/*.jar" />
     </copy>
   </target>
 
