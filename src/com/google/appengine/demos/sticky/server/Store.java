@@ -699,7 +699,6 @@ public class Store {
 				newImage = imagesService.applyTransform(transform, oldImage);
 				newImageData = newImage.getImageData();
 				this.setImage(new Blob(newImageData));
-				pm = PMF.get().getPersistenceManager();
                 pm.makePersistent(this);
                 pm.close();
 				break;
