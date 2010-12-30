@@ -289,6 +289,11 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
 //                      pm.makePersistent(this);
 //                      pm.close();
                         break;
+                case LUCKY: 
+                        transform = ImagesServiceFactory.makeImFeelingLucky();
+                        newImage = imagesService.applyTransform(transform, oldImage);
+                        newImageData = newImage.getImageData();
+                        photo.setImage(new Blob(newImageData));
                 case FLIP_H:
                         transform = ImagesServiceFactory.makeHorizontalFlip();
                         newImage = imagesService.applyTransform(transform, oldImage);

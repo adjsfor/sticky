@@ -39,6 +39,9 @@ public class PhotoTransformView extends HorizontalPanel {
 
 		@Resource("rotate_90_cc_icon.gif")
 		AbstractImagePrototype headerImageRotateCc();
+		
+		@Resource("i_am_feeling_lucky_icon.jpg")
+		AbstractImagePrototype headerImageIAmFeelingLucky();
 	}
 
 	final private Note note;
@@ -59,12 +62,11 @@ public class PhotoTransformView extends HorizontalPanel {
 			final Images images = GWT.create(Images.class);
 
 			add(Buttons.createPushButtonWithImageStates(images
-					.headerImageCrop().createImage(), "crop-button",
+					.headerImageIAmFeelingLucky().createImage(), "lucky-button",
 					new ClickHandler() {
 						public void onClick(ClickEvent event) {
-							// TODO crop image
 							model.updateNoteImage(PhotoTransformView.this.note, PhotoTransformView.this.note.getHashCode(),
-									Transformation.CROP);
+									Transformation.LUCKY);
 						}
 					}));
 
